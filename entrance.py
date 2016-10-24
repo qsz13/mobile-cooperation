@@ -5,6 +5,7 @@ import time
 from ProbabilityModel.hppp import generate_PPP
 from ProbabilityModel.rbd import generate_binDecision
 from KDTree.kdTree import query_point_r
+from KDTree.pyKDTree import pyquery_point_r
 
 _noNode = 5000
 _comm_range = 1
@@ -16,6 +17,11 @@ if __name__ == "__main__":
     
     start_time = time.time()
     l_neighbor = query_point_r(points, _comm_range)
+    print l_neighbor
+    print time.time() - start_time
+    
+    start_time = time.time()
+    l_neighbor = pyquery_point_r(points, _comm_range)
     print l_neighbor
     print time.time() - start_time
     
