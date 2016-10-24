@@ -19,6 +19,17 @@ def generate_PPP(N): # N: number of nodes
         y[i] = radii * np.sin(angle)
     return [x, y, r]
 
+
+def cirrdnPJ(x1, y1, rc):
+
+    a = 2*np.pi*np.random.uniform(0.0, 1.0, len(x1))
+    r = np.sqrt(np.random.uniform(0.0, 1.0, len(x1)))
+    x = (rc*r)*np.cos(a)+x1
+    y = (rc*r)*np.sin(a)+y1
+    data = np.array([x,y])
+    return data.T
+
+
 """ Plotting """
 """
 import matplotlib.pyplot as plt
