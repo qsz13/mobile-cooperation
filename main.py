@@ -7,7 +7,7 @@ def cirrdnPJ(base ,rc):
     r=np.sqrt(np.random.uniform(0.0, 1.0, len(x1)))
     x=(rc*r)*np.cos(a)+x1
     y=(rc*r)*np.sin(a)+y1
-    return [x,y];
+    return [x,y]
 
 # def adapt_loc(x,y,rge):
 #     location=[x,y];
