@@ -2,13 +2,14 @@ from MobilityModel.SRMM import MobilityModel
 from PGG.Map import Map
 N = 5000
 lm_min_dist = 10
+lm_possibility = 0.5
 
 
 if __name__ == "__main__":
 
     mobile_map = Map(N, lm_min_dist)
-    mobile_model = MobilityModel(N, mobile_map)
-
+    mobile_model = MobilityModel(N, mobile_map, lm_possibility, 24)
+    mobile_model.one_day()
 
 
 
