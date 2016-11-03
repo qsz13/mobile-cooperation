@@ -51,7 +51,7 @@ if __name__ == "__main__":
 
 # pykdtree
     start_time = time.time()
-    for i in range(_move_times):
+    for i in xrange(_move_times):
         points = cirrdnPJ(x, y, r_circle)
         # print points
         l_neighbor = query_with_pykdtree(points, _comm_range)
