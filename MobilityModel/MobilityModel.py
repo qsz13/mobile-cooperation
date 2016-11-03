@@ -40,7 +40,7 @@ class MobilityModel:
         self.home_pos = zip(x, y)
         # print "init points:"+str(self.home_pos)
         self.cur_pos = self.home_pos
-        self.neighbours = self._query_with_pykdtree(np.array(self.cur_pos))
+        self.neighbours, self.neighbour_count = self._query_with_pykdtree(np.array(self.cur_pos))
         # print "neighbours:" + str(self.neighbours)
 
     def one_day(self):
@@ -50,12 +50,12 @@ class MobilityModel:
             for idx, point in enumerate(self.cur_pos):
                 if goto_landmark[idx]: #goto landmark
                     lm = self.map.landmarks[landmark_selection[idx]]
-                    a = np.arctan2(lm[1]-point[1], lm[0]- point[0])
+                    a = np.arctan2(lm[1] - point[1], lm[0] - point[0])
                 else:  # random
                     a = 2 * np.pi * np.random.uniform(0.0, 1.0)
-                v = self.velocity * self._sigmoid(np.ma.MaskedArray.count(self.neighbours[idx]))
+                v = self.velocity * self._sigmoid(self.neighbour_count[idx])
                 self.cur_pos[idx] = (point[0] + v * np.cos(a), point[1] + v * np.sin(a))
-            self.neighbours = self._query_with_pykdtree(np.array(self.cur_pos))
+            self.neighbours, self.neighbour_count = self._query_with_pykdtree(np.array(self.cur_pos))
 
             self.pgg.play(self.cur_pos, self.neighbours)
         #
@@ -64,7 +64,7 @@ class MobilityModel:
         self._plot()
         self.cur_pos = self.home_pos
 
-    def _query_with_pykdtree(self, points, k = 30, r=1):
+    def _query_with_pykdtree(self, points, k = 30, r = 1):
         tree = KDTree(points)
         return tree.query(points, k = k, distance_upper_bound = r)
         #return [[x for x in nei if x < self.N] for nei in neibrs]
