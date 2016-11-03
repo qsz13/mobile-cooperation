@@ -1,7 +1,7 @@
 ''' Generate homogeneous Poisson Point Process in a Circle '''
 import numpy as np
 
-LAMBDA = 1 # the coefficient
+LAMBDA = 2 # the coefficient
 PI = np.pi # or put PI = 3.14
 
 # def generate_PPP(N): # N: number of nodes

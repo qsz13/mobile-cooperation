@@ -1,6 +1,7 @@
 import numpy as np
 from pykdtree.kdtree import KDTree
 import math
+from scipy.spatial.distance import euclidean
 PI = np.pi
 
 
@@ -18,7 +19,7 @@ class MobilityModel:
         # self._plot()
 
     def _sigmoid(self, x):
-        return 1 / (1 + math.exp(-5*x))
+        return 1 / (1 + math.exp(x-10))
 
     def _init_points(self ):
         x = np.zeros(self.N)  # Cartesian Coordinate x
@@ -34,21 +35,32 @@ class MobilityModel:
         print "init points:"+str(self.home_pos)
         self.cur_pos = self.home_pos
         self.neighbours = self._query_with_pykdtree(np.array(self.cur_pos))
-        print "neighbouts:" + str(self.neighbours)
+        print "neighbours:" + str(self.neighbours)
 
     def one_day(self):
         landmark_selection = np.random.randint(len(self.map.landmarks), size=self.N)
         for i in xrange(self.period):
             for idx, point in enumerate(self.cur_pos):
-                v = self.velocity * self._sigmoid(len(self.neighbours[idx]))
                 if np.random.choice([0,1], 1, p=[1-self.lm_possibility, self.lm_possibility])[0]: #goto landmark
                     lm = self.map.landmarks[landmark_selection[idx]]
-
-                    # a =
-                else: #random
+                    a = np.arctan2(lm[1]-point[1], lm[0]- point[0])
+                    # print "a:" + str(a)
+                else:  # random
                     a = 2 * np.pi * np.random.uniform(0.0, 1.0)
-                    self.cur_pos[idx] = (point[0] + v * np.cos(a), point[1] + v * np.sin(a))
+                v = self.velocity * self._sigmoid(len(self.neighbours[idx]))
+
+                self.cur_pos[idx] = (point[0] + v * np.cos(a), point[1] + v * np.sin(a))
+                # print self.cur_pos[idx]
+
             self.neighbours = self._query_with_pykdtree(np.array(self.cur_pos))
+
+        test = self._query_with_pykdtree(np.array(self.cur_pos+self.map.landmarks), k=150)
+        print len(test[5000])
+        print len(test[5001])
+        print len(test[5002])
+        print len(test[5003])
+        print len(test[5004])
+        self._plot()
 
     def _query_with_pykdtree(self, points, k = 20, r=1):
         tree = KDTree(points)
@@ -60,6 +72,7 @@ class MobilityModel:
         import matplotlib.pyplot as plt
         r = self.map.radius
         fig = plt.gcf()
+        fig.set_size_inches(7, 7)
         ax = fig.gca()
         plt.xlim(-r, r)
         plt.ylim(-r, r)

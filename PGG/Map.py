@@ -11,6 +11,8 @@ class Map:
     landmarks = []
 
     def _valid_landmark(self, point, lm_min_dist):
+        if euclidean((0,0),point) > self.radius:
+            return False
         for l in self.landmarks:
             if euclidean(l, point) < lm_min_dist:
                 return False
