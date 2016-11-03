@@ -28,33 +28,35 @@ class MobilityModel:
             self._sigmoid.append(1 / (1 + math.exp(i - 10)))
 
     def _init_points(self):
-        x = np.zeros(self.N)  # Cartesian Coordinate x
-        y = np.zeros(self.N)  # Cartesian Coordinate y
         u_1 = np.random.uniform(0.0, 1.0, self.N)  # generate n uniformly distributed points
         u_2 = np.random.uniform(0.0, 1.0, self.N)  # generate n uniformly distributed points
-        for i in xrange(self.N):
-            angle = 2 * PI * u_2[i]
-            radii = self.map.radius * (np.sqrt(u_1[i]))
-            x[i] = radii * np.cos(angle)
-            y[i] = radii * np.sin(angle)
-        self.home_pos = zip(x, y)
+        angle = 2*PI*u_2
+        radii = self.map.radius * np.sqrt(u_1)
+        x = radii * np.cos(angle)
+        y = radii * np.sin(angle)
+        self.home_pos = np.array((x,y)).T
         # print "init points:"+str(self.home_pos)
         self.cur_pos = self.home_pos
-        self.neighbours, self.neighbour_count = self._query_with_pykdtree(np.array(self.cur_pos), k=self.neighbor_limit)
+        self.neighbours, self.neighbour_count = self._query_with_pykdtree(self.cur_pos, k=self.neighbor_limit)
         # print "neighbours:" + str(self.neighbours)
 
     def one_day(self):
         landmark_selection = np.random.randint(len(self.map.landmarks), size=self.N)
         for i in xrange(self.period):
             goto_landmark = np.random.choice([0, 1], self.N, p=[1 - self.lm_possibility, self.lm_possibility])
+            angle = np.zeros(self.N)
+            v = np.zeros(self.N)
             for idx, point in enumerate(self.cur_pos):
                 if goto_landmark[idx]:  # goto landmark
                     lm = self.map.landmarks[landmark_selection[idx]]
-                    a = np.arctan2(lm[1] - point[1], lm[0] - point[0])
+                    angle[idx] = np.arctan2(lm[1] - point[1], lm[0] - point[0])
                 else:  # random
-                    a = 2 * np.pi * np.random.uniform(0.0, 1.0)
-                v = self.velocity * self._sigmoid[self.neighbour_count[idx]]
-                self.cur_pos[idx] = (point[0] + v * np.cos(a), point[1] + v * np.sin(a))
+                    angle[idx] = 2 * np.pi * np.random.uniform(0.0, 1.0)
+                v[idx] = self.velocity * self._sigmoid[self.neighbour_count[idx]]
+            x = self.cur_pos.T[0] + v * np.cos(angle)
+            y = self.cur_pos.T[1] + v * np.sin(angle)
+            self.cur_pos = np.array((x,y)).T
+            # print self.cur_pos
             self.neighbours, self.neighbour_count = self._query_with_pykdtree(np.array(self.cur_pos),
                                                                               k=self.neighbor_limit)
             # print self.neighbours
