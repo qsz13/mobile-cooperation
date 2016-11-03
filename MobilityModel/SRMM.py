@@ -38,6 +38,7 @@ class MobilityModel:
         print "neighbours:" + str(self.neighbours)
 
     def one_day(self):
+        print self.neighbours
         landmark_selection = np.random.randint(len(self.map.landmarks), size=self.N)
         for i in xrange(self.period):
             for idx, point in enumerate(self.cur_pos):
@@ -47,14 +48,14 @@ class MobilityModel:
                     # print "a:" + str(a)
                 else:  # random
                     a = 2 * np.pi * np.random.uniform(0.0, 1.0)
-                v = self.velocity * self._sigmoid(len(self.neighbours[idx]))
+                v = self.velocity * self._sigmoid(np.ma.count(self.neighbours[idx]))
 
                 self.cur_pos[idx] = (point[0] + v * np.cos(a), point[1] + v * np.sin(a))
                 # print self.cur_pos[idx]
 
             self.neighbours = self._query_with_pykdtree(np.array(self.cur_pos))
 
-        test = self._query_with_pykdtree(np.array(self.cur_pos+self.map.landmarks), k=150)
+        test = self._query_with_pykdtree(np.array(self.cur_pos+self.map.landmarks))
         print len(test[5000])
         print len(test[5001])
         print len(test[5002])
@@ -62,10 +63,10 @@ class MobilityModel:
         print len(test[5004])
         self._plot()
 
-    def _query_with_pykdtree(self, points, k = 20, r=1):
+    def _query_with_pykdtree(self, points, k = 30, r=1):
         tree = KDTree(points)
-        neibrs = tree.query(points, k = k, distance_upper_bound = r)[1]
-        return [[x for x in nei if x < self.N] for nei in neibrs]
+        return tree.query(points, k = k, distance_upper_bound = r)
+        #return [[x for x in nei if x < self.N] for nei in neibrs]
 
 
     def _plot(self):
