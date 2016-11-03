@@ -20,10 +20,10 @@ class Map:
 
     def _generate_landmark(self, lm_min_dist):
         while len(self.landmarks) < self.landmarks_num:
-            lm = tuple(self.radius * (2 * np.random.rand(1, 2) - 1)[0])
-
+            lm = self.radius * (2 * np.random.rand(1, 2) - 1)[0]
             if self._valid_landmark(lm, lm_min_dist):
                 self.landmarks.append(lm)
+        self.landmarks = np.array(self.landmarks)
 
     def __init__(self, N, lm_min_dist): # Number of points, landmark minimum distance
         n = np.random.poisson(N) * LAMBDA  # size of the circle C

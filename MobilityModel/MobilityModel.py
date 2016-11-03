@@ -20,12 +20,12 @@ class MobilityModel:
         self.neighbours = []
         self.pgg = PGG(N)
         self._init_points()
-        self._sigmoid = []
+        self._sigmoid = None
         self._init_sigmoid()
 
     def _init_sigmoid(self):
-        for i in xrange(self.neighbor_limit+1):
-            self._sigmoid.append(1 / (1 + math.exp(i - 10)))
+        self._sigmoid = np.array([1 / (1 + math.exp(i - 10)) for i in xrange(self.neighbor_limit+1)])
+
 
     def _init_points(self):
         u_1 = np.random.uniform(0.0, 1.0, self.N)  # generate n uniformly distributed points
@@ -44,15 +44,12 @@ class MobilityModel:
         landmark_selection = np.random.randint(len(self.map.landmarks), size=self.N)
         for i in xrange(self.period):
             goto_landmark = np.random.choice([0, 1], self.N, p=[1 - self.lm_possibility, self.lm_possibility])
-            angle = np.zeros(self.N)
-            v = np.zeros(self.N)
-            for idx, point in enumerate(self.cur_pos):
-                if goto_landmark[idx]:  # goto landmark
-                    lm = self.map.landmarks[landmark_selection[idx]]
-                    angle[idx] = np.arctan2(lm[1] - point[1], lm[0] - point[0])
-                else:  # random
-                    angle[idx] = 2 * np.pi * np.random.uniform(0.0, 1.0)
-                v[idx] = self.velocity * self._sigmoid[self.neighbour_count[idx]]
+            # angle = np.zeros(self.N)
+            lmc = self.map.landmarks[landmark_selection].T
+            # print lmc[0]
+            angle = np.arctan2(lmc[1] - self.cur_pos.T[1], lmc[0] - self.cur_pos.T[0])*goto_landmark  # landmark direction
+            angle += (2 * np.pi * np.random.uniform(0.0, 1.0))*(1-goto_landmark)    # random direction
+            v = self.velocity * self._sigmoid[np.array(self.neighbour_count)]
             x = self.cur_pos.T[0] + v * np.cos(angle)
             y = self.cur_pos.T[1] + v * np.sin(angle)
             self.cur_pos = np.array((x,y)).T
@@ -60,7 +57,7 @@ class MobilityModel:
             self.neighbours, self.neighbour_count = self._query_with_pykdtree(np.array(self.cur_pos),
                                                                               k=self.neighbor_limit)
             # print self.neighbours
-        self.pgg.play(self.neighbours, self.neighbour_count, resource = 1, enhancement = 3)
+            self.pgg.play(self.neighbours, self.neighbour_count, resource = 1, enhancement = 3)
         #
         # test = self._query_with_pykdtree(np.array(self.cur_pos+self.map.landmarks))
         # print len(test[5000])
