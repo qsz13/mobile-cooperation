@@ -1,6 +1,5 @@
 '''generate Map for mobile'''
 import numpy as np
-from scipy.spatial.distance import euclidean
 
 LAMBDA = 1 # the coefficient
 PI = np.pi # or put PI = 3.14
@@ -10,11 +9,14 @@ class Map:
     _landmark_percentage = 0.001
     landmarks = []
 
+    def _out_of_distance(self, p1, p2, dis):
+        return (p1[0]-p2[0])**2 + (p1[1]-p2[1])**2 > dis ** 2
+
     def _valid_landmark(self, point, lm_min_dist):
-        if euclidean((0,0),point) > self.radius:
+        if self._out_of_distance((0, 0), point, self.radius):
             return False
         for l in self.landmarks:
-            if euclidean(l, point) < lm_min_dist:
+            if self._out_of_distance(l, point, lm_min_dist):
                 return False
         return True
 
