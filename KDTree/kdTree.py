@@ -8,4 +8,4 @@ def query_point_r(points, r=1, n_jobs=8): # list of x, list of y, comm range r
 
 def query_with_pykdtree(points, r=1): # list of x, list of y, comm range r
     tree = KDTree(points)
-    return tree.query(points, k = 20, distance_upper_bound = r)
+    return tree.query(points, k = 50, distance_upper_bound = r)

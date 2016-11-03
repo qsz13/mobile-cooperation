@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 import numpy as np
 
 def cirrdnPJ(base ,rc):
@@ -43,10 +42,6 @@ def mobility_poisson_mixture(N, flag, mu,alpha,uni_r,r,time,run,period,amplify):
     PGG_uti=[0]*n
 
 
-
-
-
-=======
 from MobilityModel.SRMM import MobilityModel
 from PGG.Map import Map
 N = 5000
@@ -111,4 +106,3 @@ if __name__ == "__main__":
 #
 #
 # mobility_poisson_mixture(1000,'exp',0.5,0,0,0.5,30,1000,100,2)
->>>>>>> 4e3a0b065b661cf9f2f1ef30579d980b9af6b969
