@@ -58,7 +58,7 @@ class MobilityModel:
             self.neighbours, self.neighbour_count = self._query_with_pykdtree(np.array(self.cur_pos),
                                                                               k=self.neighbor_limit)
             # print self.neighbours
-            self.pgg.play(self.neighbours, self.neighbour_count, resource = 1, enhancement = 3)
+        self.pgg.play(self.neighbours, self.neighbour_count, resource = 1, enhancement = 3)
         #
         # test = self._query_with_pykdtree(np.array(self.cur_pos+self.map.landmarks))
         # print len(test[5000])
@@ -69,8 +69,9 @@ class MobilityModel:
         tree = KDTree(points)
         results, counts = tree.query(points, k=k, distance_upper_bound=r)
 
-        return [[n for n in r if n is not None] for r in results.tolist()], counts
+        return [r for r in results.tolist()], counts
         # return [[x for x in nei if x < self.N] for nei in neibrs]
+
 
     def _plot(self):
         import matplotlib.pyplot as plt

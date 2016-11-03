@@ -12,16 +12,16 @@ class PGG:
     def play(self, neighbour, neighbour_count, resource = 1, enhancement = 1):
         pool = [0]*self.N
         for idx, stgy in enumerate(self.strategy):
-            if stgy:
-                neibr_num = neighbour_count[idx]
-                contrib = float(resource)/neibr_num
-                for i in xrange(neibr_num):
+            if stgy:  # cooperate
+                contrib = float(resource)/neighbour_count[idx]  # contribution to neighbour points
+                # for nei in neighbour[idx]:
+                for i in xrange(neighbour_count[idx]):
                     pool[neighbour[idx][i]] += contrib
         profit = [0]*self.N
         for idx, stgy in enumerate(pool):
-            neibr_num = neighbour_count[idx]
-            for i in xrange(neibr_num):
-                profit[neighbour[idx][i]] += (enhancement*pool[idx])/neibr_num
+            share = (enhancement * pool[idx]) / neighbour_count[idx]  # share gain from pgg
+            for i in xrange(neighbour_count[idx]):
+                profit[neighbour[idx][i]] += share
 
         for idx, p in enumerate(profit):
             if p > resource:
@@ -29,6 +29,5 @@ class PGG:
             else:
                 self.strategy[idx] = 0
 
-        # print profit
 
 
