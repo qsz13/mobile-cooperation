@@ -3,8 +3,9 @@
 import numpy as np
 from pykdtree.kdtree import KDTree
 import math
-
-from PGG.PGG import PGG
+import pyximport
+pyximport.install(setup_args={'include_dirs': np.get_include()})
+from PGG.PGGC import PGGC
 
 PI = np.pi
 
@@ -18,7 +19,7 @@ class MobilityModel:
         self.lm_possibility = lm_possibility
         self.velocity = self.map.radius / period
         self.neighbours = []
-        self.pgg = PGG(N)
+        self.pgg = PGGC(N)
         self._init_points()
         self._sigmoid = None
         self._init_sigmoid()
@@ -54,11 +55,11 @@ class MobilityModel:
             y = self.cur_pos.T[1] + v * np.sin(angle)
             self.cur_pos = np.array((x,y)).T
             # print self.cur_pos
-        self.neighbours, self.neighbour_count = self._query_with_pykdtree(np.array(self.cur_pos),
+            self.neighbours, self.neighbour_count = self._query_with_pykdtree(np.array(self.cur_pos),
                                                                               k=self.neighbor_limit)
 
             # print self.neighbours
-        self.pgg.play(self.neighbours, self.neighbour_count, resource = 1.0, enhancement = 3.0)
+            self.pgg.play(self.neighbours, self.neighbour_count, resource = 1.0, enhancement = 3.0)
         #
         # test = self._query_with_pykdtree(np.array(self.cur_pos+self.map.landmarks))
         # print len(test[5000])

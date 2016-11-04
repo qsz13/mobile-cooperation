@@ -27,6 +27,7 @@ class PGG:
             for i in neighbour[idx]:
                 profit[i] += share
 
+
         # pool = [0.] * self.N
         # profit = [0.] * self.N
         #
