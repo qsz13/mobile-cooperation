@@ -16,7 +16,7 @@ class Map:
         if self._out_of_distance((0, 0), point, self.radius):
             return False
         for l in self.landmarks:
-            if self._out_of_distance(l, point, lm_min_dist):
+            if not self._out_of_distance(l, point, lm_min_dist):
                 return False
         return True
 
