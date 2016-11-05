@@ -55,16 +55,17 @@ class MobilityModel:
             y = self.cur_pos.T[1] + v * np.sin(angle)
             self.cur_pos = np.array((x,y)).T
             # print self.cur_pos
-            self.neighbours, self.neighbour_count = self._query_with_pykdtree(np.array(self.cur_pos),
-                                                                              k=self.neighbor_limit)
+        self.neighbours, self.neighbour_count = self._query_with_pykdtree(np.array(self.cur_pos),
+                                                                          k=self.neighbor_limit)
 
-            # print self.neighbours
-            self.pgg.play(self.neighbours, self.neighbour_count, resource = 1.0, enhancement = 3.0)
+        # print self.neighbours
+        self.pgg.play(self.neighbours, self.neighbour_count, resource = 1.0, enhancement = 3.0)
         #
         # test = self._query_with_pykdtree(np.array(self.cur_pos+self.map.landmarks))
         # print len(test[5000])
         # self._plot()
         self.cur_pos = self.home_pos
+        return self.pgg.get_coper_num()
 
     def _query_with_pykdtree(self, points, k=30, r=1):
         tree = KDTree(points)
