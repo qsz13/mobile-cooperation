@@ -76,7 +76,8 @@ class PGGMtx:
         # print profit
 
 
-        self.player = np.logical_or(self.player, self.convert_to_matrix(neighbour))
+        # self.player = np.logical_or(self.player, self.convert_to_matrix(neighbour))
+        self.convert_to_matrix(neighbour)
         neighbour_count = self.player.sum(axis=1)
         contrib = self.strategy * resource / neighbour_count
         pool = np.dot(self.strategy*contrib, self.player)
@@ -93,15 +94,14 @@ class PGGMtx:
             probability = max(0, (profit[nei] - profit[idx]) / max_diff)
             if r[idx] < probability:
                 new_strategy[idx] = self.strategy[nei]
-
         self.strategy = new_strategy
 
     def convert_to_matrix(self, neighbour):
-        mtx = np.zeros(shape=(self.N, self.N), dtype=bool)
+        # mtx = np.zeros(shape=(self.N, self.N), dtype=bool)
         for row, p in enumerate(neighbour):
             for nei in p:
-                mtx[row][p] = True
-        return mtx
+                self.player[row, nei] = True
+        # return mtx
 
     def get_coper_num(self):
         return sum(self.strategy)
