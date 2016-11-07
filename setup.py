@@ -15,4 +15,3 @@ setup(
     ext_modules=cythonize("PGG/*.pyx", include_path=[np.get_include()])
 
 )
-print np.get_include()

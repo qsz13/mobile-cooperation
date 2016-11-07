@@ -15,12 +15,12 @@ if __name__ == "__main__":
     mobile_model = MobilityModel(N, mobile_map, lm_possibility, 24)
     mobile_model.one_day()
     result = []
-    for i in xrange(1000):
+    for i in xrange(10):
         result.append(mobile_model.one_day())
         print i
 
-    plt.plot(result)
-    plt.show()
+    # plt.plot(result)
+    # plt.show()
 
     print time.time() - start_time
 
