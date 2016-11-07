@@ -30,7 +30,7 @@ class MobilityModel:
         self.lm_possibility = lm_possibility
         self.velocity = self.map.radius / period
         self.neighbours = []
-        self.pgg = PGGC(N)
+        self.pgg = PGGMtx(N)
         self._init_points()
         self._sigmoid = None
         self._init_sigmoid()
@@ -70,7 +70,7 @@ class MobilityModel:
                                                                           k=self.neighbor_limit)
 
         # print self.neighbours
-        self.pgg.play(self.neighbours, self.neighbour_count, resource = 1.0, enhancement = 3.0)
+        self.pgg.play(self.neighbours, resource = 1.0, enhancement = 3.0)
         #
         # test = self._query_with_pykdtree(np.array(self.cur_pos+self.map.landmarks))
         # print len(test[5000])
