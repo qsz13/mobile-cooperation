@@ -16,7 +16,7 @@ pyximport.install(setup_args={'include_dirs': np.get_include()})
 
 
 from PGG.PGGC import PGGC
-# from PGG.pggcpp import PGGCpp
+from PGG.PGG import PGGMtx
 
 PI = np.pi
 

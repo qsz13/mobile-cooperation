@@ -1,5 +1,6 @@
 ''' PGG model '''
 import numpy as np
+import random
 
 
 
@@ -47,3 +48,77 @@ class PGG:
 
 
 
+class PGGMtx:
+
+    def __init__(self, N):
+        self.N = N
+        self.strategy = np.random.randint(2, size=self.N)  # 1 as c 0 as d
+        self.player = np.zeros(shape=(self.N,self.N), dtype=bool)
+        # self.temp = [[]]*self.N
+
+    def play(self, neighbour, neighbour_count, resource = 1., enhancement = 1.):
+
+        # for idx in xrange(self.N):
+        #     self.temp[idx] = list(set(neighbour[idx]+self.temp[idx]))
+        # pool = [0.]*self.N
+        # profit = [0.]*self.N
+        # for idx in xrange(self.N):
+        #     if self.strategy[idx]:  # cooperate
+        #         contrib = resource / len(self.temp[idx])  # contribution to neighbour points
+        #         for i in self.temp[idx]:
+        #             pool[i] += contrib
+        # # print pool
+        # # print self.strategy
+        # for idx in xrange(self.N):
+        #     share = (enhancement * pool[idx]) / len(self.temp[idx])  # share gain from pgg
+        #     for i in self.temp[idx]:
+        #         profit[i] += share
+        #
+        # print profit
+
+
+
+
+        # pool = [0.] * self.N
+        # profit = [0.] * self.N
+        p = self.convert_to_matrix(neighbour)
+        self.player = np.logical_or(self.player, p)
+        neighbour_count = self.player.sum(axis=1)
+        contrib = (self.strategy * resource / neighbour_count)
+        pool = np.dot(self.strategy*contrib, self.player)
+        # print pool
+        # pool = [0.] * self.N
+        # for idx in xrange(self.N):
+        #     if self.strategy[idx]:  # cooperate
+        #         pool += contrib[idx] * self.player[idx]
+        # print pool
+        share = (enhancement * np.array(pool) / neighbour_count)
+        profit = np.dot(share, self.player)
+        # print profit
+        # for idx in xrange(self.N):
+        #     profit += self.player[idx]*share[idx]
+        # print profit
+
+
+
+
+        max_diff = max(profit) - min(profit)
+        new_strategy = self.strategy
+        for idx in xrange(self.N):
+            nei = random.choice(neighbour[idx])
+            if self.strategy[idx] == self.strategy[nei]:
+                continue
+            probability = max(0, (profit[nei] - profit[idx]) / max_diff)
+            if random.random() < probability:
+                new_strategy[idx] = self.strategy[nei]
+        self.strategy = new_strategy
+
+    def convert_to_matrix(self, neighbour):
+        mtx = np.zeros(shape=(self.N, self.N), dtype=bool)
+        for row, p in enumerate(neighbour):
+            for nei in p:
+                mtx[row, nei] = True
+        return mtx
+
+    def get_coper_num(self):
+        return sum(self.strategy)

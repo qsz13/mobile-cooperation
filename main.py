@@ -13,9 +13,9 @@ if __name__ == "__main__":
     start_time = time.time()
     mobile_map = Map(N, lm_min_dist)
     mobile_model = MobilityModel(N, mobile_map, lm_possibility, 24)
-    mobile_model.one_day()
+    # mobile_model.one_day()
     result = []
-    for i in xrange(10):
+    for i in xrange(100):
         result.append(mobile_model.one_day())
         print i
 
