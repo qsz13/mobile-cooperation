@@ -6,6 +6,7 @@ import numpy as np
 cimport numpy as np
 from scipy.sparse import lil_matrix
 import random
+import itertools
 
 from libcpp.vector cimport vector
 from libcpp.unordered_set cimport unordered_set
@@ -22,7 +23,7 @@ cdef class PGGC:
         self.strategy = np.random.randint(2, size=self.N)
         # self.player = [[]]*self.N
         self.player = np.zeros(shape=(self.N,self.N), dtype=bool)
-
+        self.mtx = np.zeros(shape=(self.N, self.N), dtype=bool)
 
     cdef void play_c(self, vector[vector[int]] neighbour, vector[int] neighbour_count, float resource = 1., float enhancement = 1.):
         # self.player = self.convert_to_matrix(neighbour)
@@ -53,8 +54,9 @@ cdef class PGGC:
         #     for nei in self.player[idx]:
         #         profit[nei] += share
 
-        cdef float max_diff = max(profit) - min(profit)
-
+        #cdef float max_diff = max(profit) - min(profit)
+        min, max = self.minmax(profit)
+        cdef float max_diff = max - min
         cdef np.ndarray new_strategy = self.strategy
         cdef float probability
         for idx in xrange(self.N):
@@ -67,11 +69,11 @@ cdef class PGGC:
         self.strategy = new_strategy
 
     def convert_to_matrix(self, vector[vector[int]] neighbour):
-        mtx = np.zeros(shape=(self.N, self.N), dtype=bool)
+        self.mtx.fill(False)
         for row, p in enumerate(neighbour):
             for nei in p:
-                mtx[row, nei] = True
-        return mtx
+                self.mtx[row, nei] = True
+        return self.mtx
         # print mtx.todense()
 
 
@@ -81,3 +83,15 @@ cdef class PGGC:
 
     def get_coper_num(self):
         return sum(self.strategy)
+
+    def minmax(data):
+        it = iter(data)
+        lo = hi = next(it)
+        for x, y in itertools.izip_longest(it, it, fillvalue = lo):
+            if x > y:
+                x, y = y, x
+            if x < lo:
+                lo = x
+            if y > hi:
+                hi = y
+        return lo, hi
