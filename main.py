@@ -2,6 +2,7 @@ import numpy as np
 import time
 from MobilityModel.MobilityModel import MobilityModel
 from PGG.Map import Map
+
 N = 5000
 lm_min_dist = 10
 lm_possibility = 0.5
@@ -15,14 +16,14 @@ if __name__ == "__main__":
     mobile_model = MobilityModel(N, mobile_map, lm_possibility, 24)
     # mobile_model.one_day()
     result = []
-    for i in xrange(100):
+    for i in xrange(10000):
         result.append(mobile_model.one_day())
         print i
-
-    # plt.plot(result)
-    # plt.show()
-
     print time.time() - start_time
+    print result
+    plt.plot(result)
+    plt.show()
+
 
 # def cirrdnPJ(base ,rc):
 #     x1=base[0]

@@ -17,6 +17,7 @@ cdef class PGGC:
     cdef np.ndarray strategy
     # cdef vector[unordered_set[int]] player
     cdef np.ndarray player
+    cdef np.ndarray mtx
 
     def __init__(self, N):
         self.N = N
@@ -55,17 +56,21 @@ cdef class PGGC:
         #         profit[nei] += share
 
         #cdef float max_diff = max(profit) - min(profit)
-        min, max = self.minmax(profit)
-        cdef float max_diff = max - min
+        minv, maxv = self.minmax(profit)
+
+        cdef float max_diff = maxv - minv
         cdef np.ndarray new_strategy = self.strategy
-        cdef float probability
+        # cdef float probability
         for idx in xrange(self.N):
             nei = random.choice(self.player[idx])
             if self.strategy[idx] == self.strategy[nei]:
                 continue
+            # print
+
             probability = max(0, (profit[nei]-profit[idx])/max_diff)
             if random.random() < probability :
                 new_strategy[idx] = self.strategy[nei]
+
         self.strategy = new_strategy
 
     def convert_to_matrix(self, vector[vector[int]] neighbour):
@@ -84,7 +89,7 @@ cdef class PGGC:
     def get_coper_num(self):
         return sum(self.strategy)
 
-    def minmax(data):
+    def minmax(self, data):
         it = iter(data)
         lo = hi = next(it)
         for x, y in itertools.izip_longest(it, it, fillvalue = lo):

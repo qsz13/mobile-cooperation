@@ -30,10 +30,13 @@ class MobilityModel:
         self.lm_possibility = lm_possibility
         self.velocity = self.map.radius / period
         self.neighbours = []
-        self.pgg = PGGMtx(N)
+        self.pgg = PGGC(N)
         self._init_points()
         self._sigmoid = None
         self._init_sigmoid()
+        landmark_selection = np.random.randint(len(self.map.landmarks), size=self.N)
+        self.lmc = self.map.landmarks[landmark_selection].T
+
 
     def _init_sigmoid(self):
         self._sigmoid = np.array([1 / (1 + math.exp(i - 10)) for i in xrange(self.neighbor_limit+1)])
@@ -53,13 +56,12 @@ class MobilityModel:
         # print "neighbours:" + str(self.neighbours)
 
     def one_day(self):
-        landmark_selection = np.random.randint(len(self.map.landmarks), size=self.N)
         for i in xrange(self.period):
             goto_landmark = np.random.choice([0, 1], self.N, p=[1 - self.lm_possibility, self.lm_possibility])
             # angle = np.zeros(self.N)
-            lmc = self.map.landmarks[landmark_selection].T
+
             # print lmc[0]
-            angle = np.arctan2(lmc[1] - self.cur_pos.T[1], lmc[0] - self.cur_pos.T[0])*goto_landmark  # landmark direction
+            angle = np.arctan2(self.lmc[1] - self.cur_pos.T[1], self.lmc[0] - self.cur_pos.T[0])*goto_landmark  # landmark direction
             angle += (2 * np.pi * np.random.uniform(0.0, 1.0))*(1-goto_landmark)    # random direction
             v = self.velocity * self._sigmoid[np.array(self.neighbour_count)]
             x = self.cur_pos.T[0] + v * np.cos(angle)
@@ -70,7 +72,7 @@ class MobilityModel:
                                                                           k=self.neighbor_limit)
 
         # print self.neighbours
-        self.pgg.play(self.neighbours, resource = 1.0, enhancement = 3.0)
+        self.pgg.play(self.neighbours, self.neighbour_count,resource = 1.0, enhancement = 10.0)
         #
         # test = self._query_with_pykdtree(np.array(self.cur_pos+self.map.landmarks))
         # print len(test[5000])
