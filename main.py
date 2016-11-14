@@ -1,22 +1,34 @@
 import numpy as np
-import time
+import time, os
 from MobilityModel.MobilityModel import MobilityModel
 from PGG.Map import Map
-
-N = 5000
-lm_min_dist = 10
-lm_possibility = 0.5
-
 import matplotlib.pyplot as plt
+import ConfigParser
 
+scriptDirectory = os.path.dirname(os.path.realpath(__file__))
+_confile = "mobi-coop.conf"
+
+# initialize the config parser
+conf = ConfigParser.ConfigParser()
+confFile = os.path.join(scriptDirectory,_confile)
+conf.read(confFile)
+
+N = conf.getint("map", "node")
+lm_min_dist = conf.getint("map", "landmark_min_dist")
+lm_possibility = conf.getfloat("map", "landmark_possibility")
+lm_no = conf.getint("map", "landmark_number")
+
+period = conf.getint("mobility", "period")
+enhancement = conf.getfloat("mobility", "enhancement")
+nb_limit = conf.getint("mobility", "neighbor_limit")
 
 if __name__ == "__main__":
     start_time = time.time()
-    mobile_map = Map(N, lm_min_dist)
-    mobile_model = MobilityModel(N, mobile_map, lm_possibility, 24)
+    mobile_map = Map(N, lm_min_dist, lm_no)
+    mobile_model = MobilityModel(N, mobile_map, nb_limit, lm_possibility, period, enhancement)
     # mobile_model.one_day()
     result = []
-    for i in xrange(10000):
+    for i in xrange(100):
         result.append(mobile_model.one_day())
         print i
     print time.time() - start_time

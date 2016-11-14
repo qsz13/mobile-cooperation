@@ -26,7 +26,7 @@ cdef class PGGC:
         self.player = np.zeros(shape=(self.N,self.N), dtype=bool)
         self.mtx = np.zeros(shape=(self.N, self.N), dtype=bool)
 
-    cdef void play_c(self, vector[vector[int]] neighbour, vector[int] neighbour_count, float resource = 1., float enhancement = 1.):
+    cdef void play_c(self, vector[vector[int]] neighbour, vector[int] neighbour_count, float resource = 1., float enhancement = 1.5):
         # self.player = self.convert_to_matrix(neighbour)
 
         cdef np.ndarray pool
@@ -65,12 +65,9 @@ cdef class PGGC:
             nei = random.choice(self.player[idx])
             if self.strategy[idx] == self.strategy[nei]:
                 continue
-            # print
-
             probability = max(0, (profit[nei]-profit[idx])/max_diff)
             if random.random() < probability :
                 new_strategy[idx] = self.strategy[nei]
-
         self.strategy = new_strategy
 
     def convert_to_matrix(self, vector[vector[int]] neighbour):
@@ -79,15 +76,12 @@ cdef class PGGC:
             for nei in p:
                 self.mtx[row, nei] = True
         return self.mtx
-        # print mtx.todense()
 
-
-
-    def play(self, neighbour, neighbour_count, resource = 1., enhancement = 1.):
+    def play(self, neighbour, neighbour_count, resource = 1., enhancement = 1.5):
         return self.play_c(neighbour, neighbour_count, resource, enhancement)
 
     def get_coper_num(self):
-        return sum(self.strategy)
+        return np.count_nonzero(self.strategy)
 
     def minmax(self, data):
         it = iter(data)
