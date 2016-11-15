@@ -66,7 +66,7 @@ cdef class PGGC:
             if self.strategy[idx] == self.strategy[nei]:
                 continue
             probability = max(0, (profit[nei]-profit[idx])/max_diff)
-            if random.random() < probability :
+            if np.random.rand() < probability :
                 new_strategy[idx] = self.strategy[nei]
         self.strategy = new_strategy
 

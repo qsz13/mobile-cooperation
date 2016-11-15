@@ -28,7 +28,7 @@ if __name__ == "__main__":
     mobile_model = MobilityModel(N, mobile_map, nb_limit, lm_possibility, period, enhancement)
     # mobile_model.one_day()
     result = []
-    for i in xrange(100):
+    for i in xrange(1000):
         result.append(mobile_model.one_day())
         print i
     print time.time() - start_time
