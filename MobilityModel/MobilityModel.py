@@ -89,16 +89,16 @@ class MobilityModel:
         # return [r for r in results.tolist()], counts
 
     def _plot_map(self, idx):
-        r = self.map.radius + 6.5
+        r = self.map.radius + 6
         #fig, ax = plt.subplots()
         fig = plt.gcf()
         ax = fig.gca()
 
-        fig.set_size_inches(7.5, 7.5)
+        fig.set_size_inches(7, 7)
 
         plt.xlim(-r, r)
         plt.ylim(-r, r)
-        c = plt.Circle((0, 0), radius = r, color = 'r', linewidth = 0.5, fill = False)
+        c = plt.Circle((0, 0), radius = self.map.radius, color = 'r', linewidth = 0.5, fill = False)
         ax.add_artist(c)
         # plt.plot(x, y, 'bo')
         node = plt.scatter(*zip(*self.cur_pos), s = 0.2, color = 'b')

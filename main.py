@@ -16,7 +16,7 @@ conf.read(confFile)
 N = conf.getint("map", "node")
 lm_min_dist = conf.getint("map", "landmark_min_dist")
 lm_possibility = conf.getfloat("map", "landmark_possibility")
-lm_no = conf.getint("map", "landmark_number")
+(lm_no, lm_max, lm_step) = map(int, conf.get("map", "landmark_number").split(","))
 
 period = conf.getint("mobility", "period")
 enhancement = conf.getfloat("mobility", "enhancement")
@@ -30,19 +30,19 @@ def create_path_not_exists(path):
             raise
 
 if __name__ == "__main__":
-    create_path_not_exists("output/")
-    start_time = time.time()
-    mobile_map = Map(N, lm_min_dist, lm_no)
-    mobile_model = MobilityModel(N, mobile_map, nb_limit, lm_possibility, period, enhancement)
-    # mobile_model.one_day()
-    result = []
-    for i in xrange(2):
-        result.append(mobile_model.one_day())
-        print i
-    print time.time() - start_time
-    print result
-    plt.plot(result)
-    plt.show()
+    create_path_not_exists("output/") # check if output directory exists
+    print "landmark configuration: %i, %i, %i\n"%(lm_no, lm_max, lm_step)
+    for lm_cur_no in xrange(lm_no, lm_max + 1, lm_step):
+        start_time = time.time()
+        mobile_map = Map(N, lm_min_dist, lm_cur_no)
+        mobile_model = MobilityModel(N, mobile_map, nb_limit, lm_possibility, period, enhancement)
+        # mobile_model.one_day()
+        result = []
+        for i in xrange(1):
+            result.append(mobile_model.one_day())
+            print i
+        print time.time() - start_time
+        print result
 
 
 # def cirrdnPJ(base ,rc):
