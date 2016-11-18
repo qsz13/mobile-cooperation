@@ -4,12 +4,12 @@
 
 import numpy as np
 cimport numpy as np
-from scipy.sparse import lil_matrix
-import random
+#from scipy.sparse import lil_matrix
+#import random
 import itertools
 
 from libcpp.vector cimport vector
-from libcpp.unordered_set cimport unordered_set
+#from libcpp.unordered_set cimport unordered_set
 
 cdef class PGGC:
 
@@ -21,7 +21,10 @@ cdef class PGGC:
 
     def __init__(self, N):
         self.N = N
-        self.strategy = np.random.randint(2, size=self.N)
+        #self.strategy = np.random.randint(2, size=self.N)
+        self.strategy = np.zeros(N, dtype=bool)
+        self.strategy[::2] = True
+        np.random.shuffle(self.strategy)
         # self.player = [[]]*self.N
         self.player = np.zeros(shape=(self.N,self.N), dtype=bool)
         self.mtx = np.zeros(shape=(self.N, self.N), dtype=bool)
@@ -56,13 +59,13 @@ cdef class PGGC:
         #         profit[nei] += share
 
         #cdef float max_diff = max(profit) - min(profit)
-        minv, maxv = self.minmax(profit)
+        #minv, maxv = self.minmax(profit)
 
-        cdef float max_diff = maxv - minv
+        cdef float max_diff = self.minmax(profit)
         cdef np.ndarray new_strategy = self.strategy
         # cdef float probability
         for idx in xrange(self.N):
-            nei = random.choice(self.player[idx])
+            nei = np.random.choice(self.player[idx])
             if self.strategy[idx] == self.strategy[nei]:
                 continue
             probability = max(0, (profit[nei]-profit[idx])/max_diff)
@@ -93,4 +96,4 @@ cdef class PGGC:
                 lo = x
             if y > hi:
                 hi = y
-        return lo, hi
+        return hi - lo

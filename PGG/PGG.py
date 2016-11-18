@@ -88,7 +88,7 @@ class PGGMtx:
         new_strategy = self.strategy
         r = np.random.rand(self.N)
         for idx in xrange(self.N):
-            nei = random.choice(np.where(self.player[idx] == True)[0])
+            nei = np.random.choice(np.where(self.player[idx] == True)[0])
             if self.strategy[idx] == self.strategy[nei]:
                 continue
             probability = max(0, (profit[nei] - profit[idx]) / max_diff)
