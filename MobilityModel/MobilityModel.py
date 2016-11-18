@@ -94,7 +94,7 @@ class MobilityModel:
         fig = plt.gcf()
         ax = fig.gca()
 
-        fig.set_size_inches(7, 7)
+        fig.set_size_inches(7.5, 7.5)
 
         plt.xlim(-r, r)
         plt.ylim(-r, r)
