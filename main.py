@@ -25,7 +25,7 @@ period = conf.getint("mobility", "period")
 (enhancement, enhancement_max, enhancement_step) = map(float, conf.get("mobility","enhancement").split(","))
 nb_limit = conf.getint("mobility", "neighbor_limit")
 
-iteration = 500
+iteration = 100
 
 def drange(start, stop, step):
     r = start
@@ -48,14 +48,13 @@ if __name__ == "__main__":
     for lm_cur_no in xrange(lm_no, lm_max+lm_step, lm_step):
         print "current landmark no: %i\n"%lm_cur_no
         if lm_cur_no == 1:
+            mobile_map = Map(N, lm_min_dist, lm_cur_no)
             for enhancement_cur in drange(enhancement,enhancement_max+enhancement_step,enhancement_step):
                 print "enhancement: %.1f "%enhancement_cur
                 start_time = time.time()
                 if enhancement_cur == enhancement:
-                    mobile_map = Map(N, lm_min_dist, lm_cur_no)
                     mobile_model = MobilityModel(N, mobile_map, nb_limit, lm_possibility, period, enhancement_cur, drawed = False) #need to plot map the first time
                 else:
-                    mobile_map = Map(N, lm_min_dist, lm_cur_no)
                     mobile_model = MobilityModel(N, mobile_map, nb_limit, lm_possibility, period, enhancement_cur, drawed=True)  # no need to plot map
                 result = [0.5]
                 for i in xrange(iteration):
@@ -93,6 +92,6 @@ if __name__ == "__main__":
     fontP.set_family('sans-serif')
     fontP.set_size(11)
     plt.legend(legend_list, loc = 'best', prop = fontP)
-    fig.savefig(u'output/Cooperation_Rate_%iNode_%iLmk_enhancement%f_%f.png' % (N,lm_no,enhancement,enhancement_max), dpi=300)
+    fig.savefig(u'output/Cooperation_Rate_%iNode_%iLmk_%iiter_enhance%.1f_%.1f.png' % (N,lm_no,iteration,enhancement,enhancement_max), dpi=300)
     plt.clf()
 
