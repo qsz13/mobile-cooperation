@@ -1,9 +1,12 @@
-import numpy as np
 import time, os, errno
 from MobilityModel.MobilityModel import MobilityModel
 from PGG.Map import Map
 import matplotlib.pyplot as plt
+from matplotlib.font_manager import FontProperties
+import numpy as np
 import ConfigParser
+
+MonoFont = FontProperties('monospace')
 
 scriptDirectory = os.path.dirname(os.path.realpath(__file__))
 _confile = "mobi-coop.conf"
@@ -16,11 +19,19 @@ conf.read(confFile)
 N = conf.getint("map", "node")
 lm_min_dist = conf.getint("map", "landmark_min_dist")
 lm_possibility = conf.getfloat("map", "landmark_possibility")
-(lm_no, lm_max, lm_step) = map(int, conf.get("map", "landmark_number").split(","))
+(lm_no, lm_max, lm_step) = map(int, conf.get("map","landmark_number").split(","))
 
 period = conf.getint("mobility", "period")
-enhancement = conf.getfloat("mobility", "enhancement")
+(enhancement, enhancement_max, enhancement_step) = map(float, conf.get("mobility","enhancement").split(","))
 nb_limit = conf.getint("mobility", "neighbor_limit")
+
+iteration = 500
+
+def drange(start, stop, step):
+    r = start
+    while r < stop:
+        yield r
+        r += step
 
 def create_path_not_exists(path):
     try:
@@ -32,111 +43,56 @@ def create_path_not_exists(path):
 if __name__ == "__main__":
     create_path_not_exists("output/") # check if output directory exists
     print "landmark configuration: %i, %i, %i\n"%(lm_no, lm_max, lm_step)
-    for lm_cur_no in xrange(lm_no, lm_max + 1, lm_step):
-        start_time = time.time()
-        mobile_map = Map(N, lm_min_dist, lm_cur_no)
-        mobile_model = MobilityModel(N, mobile_map, nb_limit, lm_possibility, period, enhancement)
-        # mobile_model.one_day()
-        result = []
-        for i in xrange(1):
-            result.append(mobile_model.one_day())
-            print i
-        print time.time() - start_time
-        print result
+    print "enhancement configuration: %.1f, %.1f, %.1f\n"%(enhancement, enhancement_max, enhancement_step)
+    enhancement_result = []
+    for lm_cur_no in xrange(lm_no, lm_max+lm_step, lm_step):
+        print "current landmark no: %i\n"%lm_cur_no
+        if lm_cur_no == 1:
+            for enhancement_cur in drange(enhancement,enhancement_max+enhancement_step,enhancement_step):
+                print "enhancement: %.1f "%enhancement_cur
+                start_time = time.time()
+                if enhancement_cur == enhancement:
+                    mobile_map = Map(N, lm_min_dist, lm_cur_no)
+                    mobile_model = MobilityModel(N, mobile_map, nb_limit, lm_possibility, period, enhancement_cur, drawed = False) #need to plot map the first time
+                else:
+                    mobile_map = Map(N, lm_min_dist, lm_cur_no)
+                    mobile_model = MobilityModel(N, mobile_map, nb_limit, lm_possibility, period, enhancement_cur, drawed=True)  # no need to plot map
+                result = [0.5]
+                for i in xrange(iteration):
+                    result.append(mobile_model.one_day())
+                    print i
+                print time.time() - start_time
+                enhancement_result.append(result)
+        else:
+            start_time = time.time()
+            mobile_map = Map(N, lm_min_dist, lm_cur_no)
+            mobile_model = MobilityModel(N, mobile_map, nb_limit, lm_possibility, period, enhancement, drawed = False)
+            for i in xrange(1):
+                result.append(mobile_model.one_day())
+                print i
+            print time.time() - start_time
+            print result
 
+    #plot enhancement vs cooperation ratio
+    i = 0
+    base_line = np.arange(iteration + 1)
+    enhance_list = []
+    for enhancement_cur in drange(enhancement, enhancement_max + enhancement_step, enhancement_step):
+        i += 1
+        enhance_list.append(enhancement_cur)
 
-# def cirrdnPJ(base ,rc):
-#     x1=base[0]
-#     y1=base[1]
-#     a=2*np.pi*np.random.uniform(0.0, 1.0, len(x1))
-#     r=np.sqrt(np.random.uniform(0.0, 1.0, len(x1)))
-#     x=(rc*r)*np.cos(a)+x1
-#     y=(rc*r)*np.sin(a)+y1
-#     return [x,y]
+    fig, ax = plt.subplots()
+    legend_list = []
+    for idx in xrange(i):
+        plt.plot(base_line,enhancement_result[idx])
+        legend_list.append('r = %.1f'%enhance_list[idx])
+    ax.set_ylabel(u'Pc', color='k', style = 'italic')
+    ax.set_xlabel(u'Days', color='k')
+    ax.set_title(u'Cooperation Rate under Different r (%i Node, %i Landmark)\n' % (N, lm_no), fontproperties=MonoFont,fontsize=16)
+    fontP = FontProperties()
+    fontP.set_family('sans-serif')
+    fontP.set_size(11)
+    plt.legend(legend_list, loc = 'best', prop = fontP)
+    fig.savefig(u'output/Cooperation_Rate_%iNode_%iLmk_enhancement%f_%f.png' % (N,lm_no,enhancement,enhancement_max), dpi=300)
+    plt.clf()
 
-# def adapt_loc(x,y,rge):
-#     location=[x,y];
-#     dist=pdist([0,0;location]);
-#     if(dist+rge>scale)
-#         a_loc=location*((scale-rge)/dist);
-#     else
-#         a_loc=location;
-#     end
-#     return a_loc
-
-#
-# def mobility_poisson_mixture(N, flag, mu,alpha,uni_r,r,time,run,period,amplify):
-#     n=np.random.poisson(lam=N)
-#     scale = np.sqrt(n/np.pi)
-#     if flag == "exp":
-#         ranges = np.sqrt(np.random.exponential(1/mu,(n,1))) # not sure
-#     if flag == "pareto":
-#         ranges = np.sqrt(np.random.pareto(1/alpha,mu/alpha,mu,n,1)-mu);
-#     if flag == "uni":
-#         ranges = [uni_r]*n
-#     mean_range = np.mean(ranges)
-
-    # loc=cirrdnPJ([[0]*n,[0]*n], scale);
-#   loc=arrayfun(@adapt_loc,loc(:,1),loc(:,2),Ranges,'UniformOutput',false);
-#   loc=cell2mat(loc);
-#   init_loc=loc;
-#
-#     PGG_c=1
-#     PGG_r=amplify
-#     PGG_strategy=np.round(np.random.uniform(0.0, 1.0, n))
-#     PGG_uti=[0]*n
-#
-#
-#
-#
-#
-
-
-
-# import numpy as np
-#
-# def cirrdnPJ(base ,rc):
-#     x1=base[0]
-#     y1=base[1]
-#     a=2*np.pi*np.random.uniform(0.0, 1.0, len(x1))
-#     r=np.sqrt(np.random.uniform(0.0, 1.0, len(x1)))
-#     x=(rc*r)*np.cos(a)+x1
-#     y=(rc*r)*np.sin(a)+y1
-#     return [x,y]
-#
-# # def adapt_loc(x,y,rge):
-# #     location=[x,y];
-# #     dist=pdist([0,0;location]);
-# #     if(dist+rge>scale)
-# #         a_loc=location*((scale-rge)/dist);
-# #     else
-# #         a_loc=location;
-# #     end
-# #     return a_loc
-#
-#
-# def mobility_poisson_mixture(N, flag, mu,alpha,uni_r,r,time,run,period,amplify):
-#     n=np.random.poisson(lam=N)
-#     scale = np.sqrt(n/np.pi)
-#     if flag == "exp":
-#         ranges = np.sqrt(np.random.exponential(1/mu,(n,1))) # not sure
-#     if flag == "pareto":
-#         ranges = np.sqrt(np.random.pareto(1/alpha,mu/alpha,mu,n,1)-mu);
-#     if flag == "uni":
-#         ranges = [uni_r]*n
-#     mean_range = np.mean(ranges)
-#
-#     loc=cirrdnPJ([[0]*n,[0]*n], scale)
-# #   loc=arrayfun(@adapt_loc,loc(:,1),loc(:,2),Ranges,'UniformOutput',false);
-# #   loc=cell2mat(loc);
-# #   init_loc=loc;
-#
-#     PGG_c=1
-#     PGG_r=amplify
-#     PGG_strategy=np.round(np.random.uniform(0.0, 1.0, n))
-#     PGG_uti=[0]*n
-#
-#
-#
-#
-# mobility_poisson_mixture(1000,'exp',0.5,0,0,0.5,30,1000,100,2)

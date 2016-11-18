@@ -23,7 +23,7 @@ from PGG.PGG import PGGMtx
 PI = np.pi
 
 class MobilityModel:
-    def __init__(self, N, mobile_map, nb_limit, lm_possibility, period, enhance):
+    def __init__(self, N, mobile_map, nb_limit, lm_possibility, period, enhance, drawed):
         self.N = N
         self.map = mobile_map
         self.neighbor_limit = nb_limit
@@ -38,7 +38,7 @@ class MobilityModel:
         self._init_sigmoid()
         landmark_selection = np.random.randint(len(self.map.landmarks), size=self.N)
         self.lmc = self.map.landmarks[landmark_selection].T
-        self.plotted = False
+        self.plotted = drawed
 
     def _init_sigmoid(self):
         self._sigmoid = np.array([1 / (1 + math.exp(i - 10)) for i in xrange(self.neighbor_limit+1)])
@@ -80,7 +80,7 @@ class MobilityModel:
         # test = self._query_with_pykdtree(np.array(self.cur_pos+self.map.landmarks))
         # print len(test[5000])
         self.cur_pos = self.home_pos
-        return self.pgg.get_coper_num()
+        return self.pgg.get_coper_num()/float(self.N)
 
     def _query_with_pykdtree(self, points, k = 20, r = 1):
         tree = KDTree(points)
