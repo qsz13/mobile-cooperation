@@ -3,6 +3,10 @@ import numpy as np
 from pykdtree.kdtree import KDTree
 import math
 import pyximport
+import matplotlib.pyplot as plt
+from matplotlib.font_manager import FontProperties
+
+MonoFont = FontProperties('monospace')
 
 old_get_distutils_extension = pyximport.pyximport.get_distutils_extension
 def new_get_distutils_extension(modname, pyxfilename, language_level=None):
@@ -34,6 +38,7 @@ class MobilityModel:
         self._init_sigmoid()
         landmark_selection = np.random.randint(len(self.map.landmarks), size=self.N)
         self.lmc = self.map.landmarks[landmark_selection].T
+        self.plotted = False
 
     def _init_sigmoid(self):
         self._sigmoid = np.array([1 / (1 + math.exp(i - 10)) for i in xrange(self.neighbor_limit+1)])
@@ -63,33 +68,46 @@ class MobilityModel:
             y = self.cur_pos.T[1] + v * np.sin(angle)
             self.cur_pos = np.array((x,y)).T
             # print self.cur_pos
+            if not self.plotted:
+                self._plot_map(i)
+                if i == self.period - 1:
+                    self.plotted = True
+                    plt.close()
         self.neighbours, self.neighbour_count = self._query_with_pykdtree(np.array(self.cur_pos), k = self.neighbor_limit)
 
         # print self.neighbours
         self.pgg.play(self.neighbours, self.neighbour_count, resource = 1.0, enhancement = self.enhancement)
         # test = self._query_with_pykdtree(np.array(self.cur_pos+self.map.landmarks))
         # print len(test[5000])
-        # self._plot()
         self.cur_pos = self.home_pos
         return self.pgg.get_coper_num()
 
     def _query_with_pykdtree(self, points, k = 20, r = 1):
         tree = KDTree(points)
-        results, counts = tree.query(points, k=k, distance_upper_bound=r)
+        results, counts = tree.query(points, k = k, distance_upper_bound = r)
         return [r[:counts[idx]] for idx, r in enumerate(results.tolist())], counts
         # return [r for r in results.tolist()], counts
 
-    def _plot(self):
-        import matplotlib.pyplot as plt
-        r = self.map.radius
+    def _plot_map(self, idx):
+        r = self.map.radius + 6.5
+        #fig, ax = plt.subplots()
         fig = plt.gcf()
-        fig.set_size_inches(7, 7)
         ax = fig.gca()
+
+        fig.set_size_inches(7.5, 7.5)
+
         plt.xlim(-r, r)
         plt.ylim(-r, r)
-        c = plt.Circle((0, 0), radius=r, color='r', linewidth=1, fill=False)
+        c = plt.Circle((0, 0), radius = r, color = 'r', linewidth = 0.5, fill = False)
         ax.add_artist(c)
         # plt.plot(x, y, 'bo')
-        plt.scatter(*zip(*self.cur_pos))
-        plt.scatter(*zip(*self.map.landmarks), color='r')
-        plt.show()
+        node = plt.scatter(*zip(*self.cur_pos), s = 0.2, color = 'b')
+        landmark = plt.scatter(*zip(*self.map.landmarks), color = 'r')
+        ax.set_title(u'Distribution Map of %i Nodes in Daily Step %i\n' % (self.N, idx), fontproperties = MonoFont, fontsize = 18)
+        fontP = FontProperties()
+        fontP.set_family('sans-serif')
+        fontP.set_size(12)
+        ax.legend((node, landmark), (u'Node', u'Landmark'), prop = fontP)
+        #plt.axes().set_aspect('equal', 'datalim')
+        fig.savefig(u'output/map_distribution_%iNode_%iLmk_%i.png' % (self.N, len(self.map.landmarks), idx), dpi = 300)
+        plt.clf()

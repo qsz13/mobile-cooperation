@@ -1,5 +1,5 @@
 import numpy as np
-import time, os
+import time, os, errno
 from MobilityModel.MobilityModel import MobilityModel
 from PGG.Map import Map
 import matplotlib.pyplot as plt
@@ -22,13 +22,21 @@ period = conf.getint("mobility", "period")
 enhancement = conf.getfloat("mobility", "enhancement")
 nb_limit = conf.getint("mobility", "neighbor_limit")
 
+def create_path_not_exists(path):
+    try:
+        os.makedirs(path)
+    except OSError as exception:
+        if exception.errno != errno.EEXIST:
+            raise
+
 if __name__ == "__main__":
+    create_path_not_exists("output/")
     start_time = time.time()
     mobile_map = Map(N, lm_min_dist, lm_no)
     mobile_model = MobilityModel(N, mobile_map, nb_limit, lm_possibility, period, enhancement)
     # mobile_model.one_day()
     result = []
-    for i in xrange(1000):
+    for i in xrange(2):
         result.append(mobile_model.one_day())
         print i
     print time.time() - start_time
