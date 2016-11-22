@@ -5,7 +5,6 @@ import cython
 import numpy as np
 cimport numpy as np
 import itertools
-from libcpp cimport bool
 
 ctypedef np.uint8_t DTYPE_uint8_t
 ctypedef np.float_t DTYPE_float_t
@@ -27,27 +26,23 @@ cdef class PGGC:
 
     @cython.boundscheck(False)
     @cython.wraparound(False)
-    cdef void play_c(self, DTYPE_uint8_t[:,:] neighbour, float resource = 1., double enhancement = 1.5):
+    cdef void play_c(self, float resource = 1., double enhancement = 1.5):
         cdef np.ndarray pool
         cdef np.ndarray profit
         cdef int idx, nei
         cdef np.ndarray contrib
         cdef np.ndarray share
-        self.player = np.logical_or(self.player, neighbour)
+        # self.player = np.logical_or(self.player, neighbour)
 
         neighbour_count = self.player.sum(axis=1)
         contrib = self.strategy * resource / neighbour_count
         pool = np.dot(self.strategy*contrib, self.player)
         share = enhancement * np.array(pool) / neighbour_count
         profit = np.dot(share, self.player)
-
-
         cdef float max_diff = self.minmax(profit)
         cdef np.ndarray new_strategy = self.strategy
         for idx in xrange(self.N):
-            # neibors = self.player[idx]
             nei = np.random.choice(np.where(self.player[idx] == True)[0])
-            # print nei
             if self.strategy[idx] == self.strategy[nei]:
                 continue
             probability = max(0, (profit[nei]-profit[idx])/max_diff)
@@ -56,26 +51,35 @@ cdef class PGGC:
         self.strategy = new_strategy
 
 
-    def play(self, neighbour, resource = 1., enhancement = 1.5):
-        cdef DTYPE_uint8_t [:,:] arr_view = neighbour.astype(np.uint8)
+    def play(self, resource = 1., enhancement = 1.5):
+        self.play_c(resource, enhancement)
 
-        self.play_c(arr_view, resource, enhancement)
+    # @cython.boundscheck(False)
+    # @cython.wraparound(False)
+    # cdef accumulate_neighbour_c(self, DTYPE_uint8_t[:,:] neighbour):
+    #     self.player = np.logical_or(self.player, neighbour)
 
 
     def accumulate_neighbour(self, neighbour):
         self.player = np.logical_or(self.player, neighbour)
 
+        # self.accumulate_neighbour_c(neighbour)
+
     def get_coper_num(self):
         return np.count_nonzero(self.strategy)
 
-    cdef minmax(self, DTYPE_float_t[:] data):
-        it = iter(data)
-        lo = hi = next(it)
-        for x, y in itertools.izip_longest(it, it, fillvalue = lo):
-            if x > y:
-                x, y = y, x
-            if x < lo:
-                lo = x
-            if y > hi:
-                hi = y
-        return hi - lo
+    @cython.boundscheck(False)
+    @cython.wraparound(False)
+    cdef float minmax(self, np.ndarray data) :
+
+        return np.max(data)-np.min(data)
+        # it = iter(data)
+        # lo = hi = next(it)
+        # for x, y in itertools.izip_longest(it, it, fillvalue = lo):
+        #     if x > y:
+        #         x, y = y, x
+        #     if x < lo:
+        #         lo = x
+        #     if y > hi:
+        #         hi = y
+        # return hi - lo
