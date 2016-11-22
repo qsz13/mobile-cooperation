@@ -18,7 +18,6 @@ pyximport.pyximport.get_distutils_extension = new_get_distutils_extension
 pyximport.install(setup_args={'include_dirs': np.get_include()})
 
 from PGG.PGGC import PGGC
-from PGG.PGG import PGGMtx
 
 PI = np.pi
 
@@ -51,10 +50,8 @@ class MobilityModel:
         x = radii * np.cos(angle)
         y = radii * np.sin(angle)
         self.home_pos = np.array((x,y)).T
-        # print "init points:"+str(self.home_pos)
         self.cur_pos = self.home_pos
         self._query_with_pykdtree(self.cur_pos, k=self.neighbor_limit)
-        # print "neighbours:" + str(self.neighbours)
 
     def one_day(self):
         for i in xrange(self.period):
@@ -73,9 +70,10 @@ class MobilityModel:
                 if i == self.period - 1:
                     self.plotted = True
                     plt.close()
-            self._query_with_pykdtree(np.array(self.cur_pos), k = self.neighbor_limit)
-            #print self.neighbour_count
 
+            nei = self._query_with_pykdtree(np.array(self.cur_pos), k = self.neighbor_limit)
+            self.pgg.accumulate_neighbour(nei)
+        # print self.neighbours
         self.pgg.play(self.neighbours, resource = 1.0, enhancement = self.enhancement)
         # test = self._query_with_pykdtree(np.array(self.cur_pos+self.map.landmarks))
         # print len(test[5000])
@@ -85,7 +83,8 @@ class MobilityModel:
     def _query_with_pykdtree(self, points, k = 20, r = 1):
         tree = KDTree(points)
         results, self.neighbour_count = tree.query(points, k = k, distance_upper_bound = r)
-        self.neighbours = np.logical_or(self.neighbours, results)
+        return results
+        # self.neighbours = np.logical_or(self.neighbours, results)
         #return [r[:counts[idx]] for idx, r in enumerate(results.tolist())], counts
         # return [r for r in results.tolist()], counts
 

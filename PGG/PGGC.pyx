@@ -9,13 +9,11 @@ cimport numpy as np
 import itertools
 
 from libcpp.vector cimport vector
-#from libcpp.unordered_set cimport unordered_set
 
 cdef class PGGC:
 
     cdef int N
     cdef np.ndarray strategy
-    # cdef vector[unordered_set[int]] player
     cdef np.ndarray player
     cdef np.ndarray mtx
 
@@ -63,7 +61,6 @@ cdef class PGGC:
 
         cdef float max_diff = self.minmax(profit)
         cdef np.ndarray new_strategy = self.strategy
-        # cdef float probability
         for idx in xrange(self.N):
             nei = np.random.choice(self.player[idx])
             if self.strategy[idx] == self.strategy[nei]:
@@ -82,6 +79,14 @@ cdef class PGGC:
 
     def play(self, neighbour, resource = 1., enhancement = 1.5):
         return self.play_c(neighbour, resource, enhancement)
+
+    cdef accumulate_neighbour_c(self, np.ndarray neighbour):
+        self.player = np.logical_or(self.player, neighbour)
+
+
+    def accumulate_neighbour(self, neighbour):
+        return self.accumulate_neighbour_c(neighbour)
+
 
     def get_coper_num(self):
         return np.count_nonzero(self.strategy)
