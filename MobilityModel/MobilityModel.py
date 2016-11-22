@@ -30,6 +30,7 @@ class MobilityModel:
         self.period = period
         self.enhancement = enhance
         self.velocity = self.map.radius / period
+        self.neighbours = np.zeros((N, N), dtype=bool)
         self.pgg = PGGC(N)
         self._init_points()
         self._sigmoid = None
@@ -44,8 +45,8 @@ class MobilityModel:
     def _init_points(self):
         angle = 2*PI*np.random.uniform(0.0, 1.0, self.N)
         radii = self.map.radius * np.sqrt(np.random.uniform(0.0, 1.0, self.N))
-        x = np.float32(radii * np.cos(angle))
-        y = np.float32(radii * np.sin(angle))
+        x = radii * np.cos(angle)
+        y = radii * np.sin(angle)
         self.home_pos = np.array((x,y))
         self.cur_pos = self.home_pos
         self._query_with_pykdtree(self.cur_pos.T, k=self.neighbor_limit)
@@ -60,8 +61,8 @@ class MobilityModel:
             v = self.velocity * self._sigmoid[np.array(self.neighbour_count)]
 
             # print id(self.cur_pos)
-            x = np.float32(self.cur_pos[0] + v * np.cos(angle))
-            y = np.float32(self.cur_pos[1] + v * np.sin(angle))
+            x = self.cur_pos[0] + v * np.cos(angle)
+            y = self.cur_pos[1] + v * np.sin(angle)
             self.cur_pos = np.array((x,y))
             # print id(self.cur_pos)
             #
@@ -72,21 +73,21 @@ class MobilityModel:
 
             # x = np.take(self.cur_pos,0) + v * np.cos(angle)
             # y = np.take(self.cur_pos,1) + v * np.sin(angle)
-            nei = self._query_with_pykdtree(self.cur_pos.T, k=self.neighbor_limit)
-            self.pgg.accumulate_neighbour(nei)
 
             # print self.cur_pos
-            if not self.plotted:
-                 self._plot_map(i)
-                 if i == self.period - 1:
-                     self.plotted = True
-                     plt.close()
+            # if not self.plotted:
+            #     self._plot_map(i)
+            #     if i == self.period - 1:
+            #         self.plotted = True
+            #         plt.close()
+            nei = self._query_with_pykdtree(self.cur_pos.T, k = self.neighbor_limit)
+            self.pgg.accumulate_neighbour(nei)
 
         self.pgg.play(resource = 1.0, enhancement = self.enhancement)
         self.cur_pos = self.home_pos
         return self.pgg.get_coper_num()/float(self.N)
 
-    def _query_with_pykdtree(self, points, k = 20, r = np.float32(1.)):
+    def _query_with_pykdtree(self, points, k = 20, r = 1):
         tree = KDTree(points)
         results, self.neighbour_count = tree.query(points, k = k, distance_upper_bound = r)
         return results

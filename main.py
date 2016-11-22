@@ -25,10 +25,7 @@ period = conf.getint("mobility", "period")
 (enhancement, enhancement_max, enhancement_step) = map(float, conf.get("mobility","enhancement").split(","))
 nb_limit = conf.getint("mobility", "neighbor_limit")
 
-distribution_map = conf.getboolean("plot","distribution_map")
-enhance_vs_r = conf.getboolean("plot","enhance_vs_r")
-
-iteration = 10
+iteration = 100
 
 def drange(start, stop, step):
     r = start
@@ -57,7 +54,7 @@ if __name__ == "__main__":
             print "enhancement: %.1f "%enhancement_cur
             start_time = time.time()
             if enhancement_cur == enhancement:
-                mobile_model = MobilityModel(N, mobile_map, nb_limit, lm_possibility, period, enhancement_cur, drawed = not distribution_map) #need to plot map the first time
+                mobile_model = MobilityModel(N, mobile_map, nb_limit, lm_possibility, period, enhancement_cur, drawed = False) #need to plot map the first time
             else:
                 mobile_model = MobilityModel(N, mobile_map, nb_limit, lm_possibility, period, enhancement_cur, drawed = True)  # no need to plot map
             result = [0.5]
@@ -81,26 +78,25 @@ if __name__ == "__main__":
         '''
 
         #plot enhancement vs cooperation ratio
-        if enhance_vs_r:
-            i = 0
-            base_line = np.arange(iteration + 1)
-            enhance_list = []
-            for enhancement_cur in drange(enhancement, enhancement_max + enhancement_step, enhancement_step):
-                i += 1
-                enhance_list.append(enhancement_cur)
+        i = 0
+        base_line = np.arange(iteration + 1)
+        enhance_list = []
+        for enhancement_cur in drange(enhancement, enhancement_max + enhancement_step, enhancement_step):
+            i += 1
+            enhance_list.append(enhancement_cur)
 
-            fig, ax = plt.subplots()
-            legend_list = []
-            for idx in xrange(i):
-                plt.plot(base_line,enhancement_result[idx])
-                legend_list.append('r = %.1f'%enhance_list[idx])
-            ax.set_ylabel(u'Pc', color='k', style = 'italic')
-            ax.set_xlabel(u'Days', color='k', style = 'italic')
-            ax.set_title(u'Cooperation Rate under Different r (%i Node, %i Landmark)\n' % (N, lm_cur_no), fontproperties=MonoFont,fontsize=16)
-            fontP = FontProperties()
-            fontP.set_family('sans-serif')
-            fontP.set_size(11)
-            plt.legend(legend_list, loc = 'best', prop = fontP)
-            fig.savefig(u'output/Cooperation_Rate_%iNode_%iLmk_%iiter_enhance%.1f_%.1f.png' % (N,lm_cur_no,iteration,enhancement,enhancement_max), dpi=300)
-            plt.clf()
+        fig, ax = plt.subplots()
+        legend_list = []
+        for idx in xrange(i):
+            plt.plot(base_line,enhancement_result[idx])
+            legend_list.append('r = %.1f'%enhance_list[idx])
+        ax.set_ylabel(u'Pc', color='k', style = 'italic')
+        ax.set_xlabel(u'Days', color='k', style = 'italic')
+        ax.set_title(u'Cooperation Rate under Different r (%i Node, %i Landmark)\n' % (N, lm_cur_no), fontproperties=MonoFont,fontsize=16)
+        fontP = FontProperties()
+        fontP.set_family('sans-serif')
+        fontP.set_size(11)
+        plt.legend(legend_list, loc = 'best', prop = fontP)
+        fig.savefig(u'output/Cooperation_Rate_%iNode_%iLmk_%iiter_enhance%.1f_%.1f.png' % (N,lm_cur_no,iteration,enhancement,enhancement_max), dpi=300)
+        plt.clf()
 

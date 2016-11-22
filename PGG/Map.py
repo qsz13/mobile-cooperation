@@ -1,12 +1,14 @@
 '''generate Map for mobile'''
 import numpy as np
 
+LAMBDA = 1 # the coefficient
+PI = np.pi # or put PI = 3.14
+
 class Map:
     def __init__(self, N, lm_min_dist, lm_no): # Number of points, landmark minimum distance, number of landmarks
-        LAMBDA = 1  # the coefficient
         n = np.random.poisson(N) * LAMBDA  # size of the circle C
         self.landmarks = []
-        self.radius = np.sqrt(n / np.pi)  # radius of the circle C
+        self.radius = np.sqrt(n / PI)  # radius of the circle C
         self.landmarks_num = lm_no
         self._generate_landmark(lm_min_dist)
 
