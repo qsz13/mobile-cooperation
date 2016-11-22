@@ -74,8 +74,8 @@ class MobilityModel:
                     self.plotted = True
                     plt.close()
             self._query_with_pykdtree(np.array(self.cur_pos), k = self.neighbor_limit)
+            #print self.neighbour_count
 
-        # print self.neighbours
         self.pgg.play(self.neighbours, resource = 1.0, enhancement = self.enhancement)
         # test = self._query_with_pykdtree(np.array(self.cur_pos+self.map.landmarks))
         # print len(test[5000])
