@@ -41,7 +41,7 @@ class MobilityModel:
         self.plotted = drawed
 
     def _init_sigmoid(self):
-        self._sigmoid = np.array([1 / (1 + math.exp(i - 10)) for i in xrange(self.neighbor_limit+1)])
+        self._sigmoid = np.array([1 / (1 + math.exp(i - 15)) for i in xrange(self.neighbor_limit+1)])
 
     def _init_points(self):
         u_1 = np.random.uniform(0.0, 1.0, self.N)  # generate n uniformly distributed points
@@ -62,7 +62,7 @@ class MobilityModel:
             # angle = np.zeros(self.N)
             # print lmc[0]
             angle = np.arctan2(self.lmc[1] - self.cur_pos.T[1], self.lmc[0] - self.cur_pos.T[0])*goto_landmark  # landmark direction
-            angle += (2 * np.pi * np.random.uniform(0.0, 1.0))*(1-goto_landmark)    # random direction
+            angle += (2 * np.pi * np.random.uniform(0.0, 1.0, self.N))*(1 - goto_landmark)    # random direction
             v = self.velocity * self._sigmoid[np.array(self.neighbour_count)]
             x = self.cur_pos.T[0] + v * np.cos(angle)
             y = self.cur_pos.T[1] + v * np.sin(angle)
