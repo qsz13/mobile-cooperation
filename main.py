@@ -25,7 +25,7 @@ period = conf.getint("mobility", "period")
 (enhancement, enhancement_max, enhancement_step) = map(float, conf.get("mobility","enhancement").split(","))
 nb_limit = conf.getint("mobility", "neighbor_limit")
 
-iteration = 1000
+iteration = 100
 
 def drange(start, stop, step):
     r = start

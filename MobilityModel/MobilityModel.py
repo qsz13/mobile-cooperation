@@ -31,7 +31,7 @@ class MobilityModel:
         self.period = period
         self.enhancement = enhance
         self.velocity = self.map.radius / period
-        self.neighbours = []
+        self.neighbours = np.zeros((N, N), dtype=bool)
         self.pgg = PGGC(N)
         self._init_points()
         self._sigmoid = None
@@ -53,7 +53,7 @@ class MobilityModel:
         self.home_pos = np.array((x,y)).T
         # print "init points:"+str(self.home_pos)
         self.cur_pos = self.home_pos
-        self.neighbours, self.neighbour_count = self._query_with_pykdtree(self.cur_pos, k=self.neighbor_limit)
+        self._query_with_pykdtree(self.cur_pos, k=self.neighbor_limit)
         # print "neighbours:" + str(self.neighbours)
 
     def one_day(self):
@@ -73,10 +73,10 @@ class MobilityModel:
                 if i == self.period - 1:
                     self.plotted = True
                     plt.close()
-        self.neighbours, self.neighbour_count = self._query_with_pykdtree(np.array(self.cur_pos), k = self.neighbor_limit)
+            self._query_with_pykdtree(np.array(self.cur_pos), k = self.neighbor_limit)
 
         # print self.neighbours
-        self.pgg.play(self.neighbours, self.neighbour_count, resource = 1.0, enhancement = self.enhancement)
+        self.pgg.play(self.neighbours, resource = 1.0, enhancement = self.enhancement)
         # test = self._query_with_pykdtree(np.array(self.cur_pos+self.map.landmarks))
         # print len(test[5000])
         self.cur_pos = self.home_pos
@@ -84,8 +84,9 @@ class MobilityModel:
 
     def _query_with_pykdtree(self, points, k = 20, r = 1):
         tree = KDTree(points)
-        results, counts = tree.query(points, k = k, distance_upper_bound = r)
-        return [r[:counts[idx]] for idx, r in enumerate(results.tolist())], counts
+        results, self.neighbour_count = tree.query(points, k = k, distance_upper_bound = r)
+        self.neighbours = np.logical_or(self.neighbours, results)
+        #return [r[:counts[idx]] for idx, r in enumerate(results.tolist())], counts
         # return [r for r in results.tolist()], counts
 
     def _plot_map(self, idx):
