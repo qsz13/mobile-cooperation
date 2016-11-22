@@ -3,8 +3,10 @@
 # cython: wraparound=False
 # cython: boundscheck=False
 """ cython version of PGG model """
+import cython
 import numpy as np
 cimport numpy as np
+import itertools
 
 ctypedef np.uint8_t DTYPE_uint8_t
 ctypedef np.float_t DTYPE_float_t
@@ -14,13 +16,15 @@ cdef class PGGC:
     cdef int N
     cdef np.ndarray strategy
     cdef np.ndarray player
+    cdef np.ndarray mtx
 
     def __init__(self, N):
         self.N = N
         self.strategy = np.zeros(N, dtype=np.uint8)
         self.strategy[::2] = True
         np.random.shuffle(self.strategy)
-        self.player = np.zeros(shape=(self.N, self.N), dtype=np.uint8)
+        self.player = np.zeros(shape=(self.N, self.N), dtype=bool)
+        #self.mtx = np.zeros(shape=(self.N, self.N), dtype=np.uint8)
 
 
     cdef void play_c(self, float resource = 1., double enhancement = 1.5):
@@ -28,15 +32,15 @@ cdef class PGGC:
         cdef np.ndarray profit
         cdef int idx, nei
         cdef np.ndarray contrib
-        # cdef np.ndarray share
-        cdef np.ndarray neighbour_count
+        cdef np.ndarray share
+        # self.player = np.logical_or(self.player, neighbour)
+
         neighbour_count = self.player.sum(axis=1)
         contrib = self.strategy * resource
         contrib /= neighbour_count
         pool = np.dot(self.strategy*contrib, self.player)
-        pool *= enhancement
-        pool /= neighbour_count
-        profit = np.dot(pool, self.player)
+        share = enhancement * np.array(pool) / neighbour_count
+        profit = np.dot(share, self.player)
         cdef float max_diff = self.minmax(profit)
         cdef np.ndarray new_strategy = self.strategy
         for idx in xrange(self.N):
@@ -59,6 +63,7 @@ cdef class PGGC:
     #             if neighbour[i][j] == 1 :
     #                 self.player[i][j] = 1
 
+    @cython.boundscheck(False)
     def accumulate_neighbour(self,  neighbour):
         # self.accumulate_neighbour_c(neighbour)
         # print neighbour.dtype
