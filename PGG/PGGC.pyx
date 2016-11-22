@@ -1,5 +1,7 @@
 # cython: profile=True
 # cython: linetrace=True
+# cython: wraparound=False
+# cython: boundscheck=False
 """ cython version of PGG model """
 import cython
 import numpy as np
@@ -24,8 +26,7 @@ cdef class PGGC:
         self.player = np.zeros(shape=(self.N, self.N), dtype=np.uint8)
         self.mtx = np.zeros(shape=(self.N, self.N), dtype=np.uint8)
 
-    @cython.boundscheck(False)
-    @cython.wraparound(False)
+
     cdef void play_c(self, float resource = 1., double enhancement = 1.5):
         cdef np.ndarray pool
         cdef np.ndarray profit
@@ -54,32 +55,26 @@ cdef class PGGC:
     def play(self, resource = 1., enhancement = 1.5):
         self.play_c(resource, enhancement)
 
-    # @cython.boundscheck(False)
-    # @cython.wraparound(False)
-    # cdef accumulate_neighbour_c(self, DTYPE_uint8_t[:,:] neighbour):
-    #     self.player = np.logical_or(self.player, neighbour)
+    # cdef accumulate_neighbour_c(self, np.ndarray neighbour):
+    #     cdef int i,j
+    #     for i in xrange(self.N):
+    #         for j in xrange(self.N):
+    #             if neighbour[i][j] == 1 :
+    #                 self.player[i][j] = 1
 
-
-    def accumulate_neighbour(self, neighbour):
-        self.player = np.logical_or(self.player, neighbour)
-
+    def accumulate_neighbour(self,  neighbour):
         # self.accumulate_neighbour_c(neighbour)
+        # print neighbour.dtype
+        # print id(self.player)
+        # self.player|=neighbour
+
+        self.player = np.logical_or(self.player, neighbour)
+        # print id(self.player)
+
 
     def get_coper_num(self):
         return np.count_nonzero(self.strategy)
 
-    @cython.boundscheck(False)
-    @cython.wraparound(False)
-    cdef float minmax(self, np.ndarray data) :
 
+    cdef float minmax(self, np.ndarray data) :
         return np.max(data)-np.min(data)
-        # it = iter(data)
-        # lo = hi = next(it)
-        # for x, y in itertools.izip_longest(it, it, fillvalue = lo):
-        #     if x > y:
-        #         x, y = y, x
-        #     if x < lo:
-        #         lo = x
-        #     if y > hi:
-        #         hi = y
-        # return hi - lo

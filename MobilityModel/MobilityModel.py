@@ -12,7 +12,7 @@ old_get_distutils_extension = pyximport.pyximport.get_distutils_extension
 def new_get_distutils_extension(modname, pyxfilename, language_level=None):
     extension_mod, setup_args = old_get_distutils_extension(modname, pyxfilename, language_level)
     extension_mod.language='c++'
-    extension_mod.extra_compile_args=["-std=c++11","-O3"]
+    extension_mod.extra_compile_args=["-march=native","-O3"]
     return extension_mod,setup_args
 pyximport.pyximport.get_distutils_extension = new_get_distutils_extension
 pyximport.install(setup_args={'include_dirs': np.get_include()})
@@ -43,40 +43,47 @@ class MobilityModel:
         self._sigmoid = np.array([1 / (1 + math.exp(i - 15)) for i in xrange(self.neighbor_limit+1)])
 
     def _init_points(self):
-        u_1 = np.random.uniform(0.0, 1.0, self.N)  # generate n uniformly distributed points
-        u_2 = np.random.uniform(0.0, 1.0, self.N)  # generate n uniformly distributed points
-        angle = 2*PI*u_2
-        radii = self.map.radius * np.sqrt(u_1)
+        angle = 2*PI*np.random.uniform(0.0, 1.0, self.N)
+        radii = self.map.radius * np.sqrt(np.random.uniform(0.0, 1.0, self.N))
         x = radii * np.cos(angle)
         y = radii * np.sin(angle)
-        self.home_pos = np.array((x,y)).T
+        self.home_pos = np.array((x,y))
         self.cur_pos = self.home_pos
-        self._query_with_pykdtree(self.cur_pos, k=self.neighbor_limit)
+        self._query_with_pykdtree(self.cur_pos.T, k=self.neighbor_limit)
 
     def one_day(self):
         for i in xrange(self.period):
             goto_landmark = np.random.choice([0, 1], self.N, p=[1 - self.lm_possibility, self.lm_possibility])
             # angle = np.zeros(self.N)
             # print lmc[0]
-            angle = np.arctan2(self.lmc[1] - self.cur_pos.T[1], self.lmc[0] - self.cur_pos.T[0])*goto_landmark  # landmark direction
+            angle = np.arctan2(self.lmc[1] - self.cur_pos[1], self.lmc[0] - self.cur_pos[0])*goto_landmark  # landmark direction
             angle += (2 * np.pi * np.random.uniform(0.0, 1.0, self.N))*(1 - goto_landmark)    # random direction
             v = self.velocity * self._sigmoid[np.array(self.neighbour_count)]
-            x = self.cur_pos.T[0] + v * np.cos(angle)
-            y = self.cur_pos.T[1] + v * np.sin(angle)
-            self.cur_pos = np.array((x,y)).T
+
+            # print id(self.cur_pos)
+            x = self.cur_pos[0] + v * np.cos(angle)
+            y = self.cur_pos[1] + v * np.sin(angle)
+            self.cur_pos = np.array((x,y))
+            # print id(self.cur_pos)
+            #
+            # print id(self.cur_pos)
+            # self.cur_pos[0] += v * np.cos(angle)
+            # self.cur_pos[1] += v * np.sin(angle)
+            # print id(self.cur_pos)
+
+            # x = np.take(self.cur_pos,0) + v * np.cos(angle)
+            # y = np.take(self.cur_pos,1) + v * np.sin(angle)
+
             # print self.cur_pos
             # if not self.plotted:
             #     self._plot_map(i)
             #     if i == self.period - 1:
             #         self.plotted = True
             #         plt.close()
-
-            nei = self._query_with_pykdtree(np.array(self.cur_pos), k = self.neighbor_limit)
+            nei = self._query_with_pykdtree(self.cur_pos.T, k = self.neighbor_limit)
             self.pgg.accumulate_neighbour(nei)
-        # print self.neighbours
+
         self.pgg.play(resource = 1.0, enhancement = self.enhancement)
-        # test = self._query_with_pykdtree(np.array(self.cur_pos+self.map.landmarks))
-        # print len(test[5000])
         self.cur_pos = self.home_pos
         return self.pgg.get_coper_num()/float(self.N)
 
