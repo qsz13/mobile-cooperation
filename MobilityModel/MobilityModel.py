@@ -65,11 +65,11 @@ class MobilityModel:
             y = self.cur_pos.T[1] + v * np.sin(angle)
             self.cur_pos = np.array((x,y)).T
             # print self.cur_pos
-            if not self.plotted:
-                self._plot_map(i)
-                if i == self.period - 1:
-                    self.plotted = True
-                    plt.close()
+            # if not self.plotted:
+            #     self._plot_map(i)
+            #     if i == self.period - 1:
+            #         self.plotted = True
+            #         plt.close()
 
             nei = self._query_with_pykdtree(np.array(self.cur_pos), k = self.neighbor_limit)
             self.pgg.accumulate_neighbour(nei)
