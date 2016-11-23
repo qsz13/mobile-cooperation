@@ -34,7 +34,8 @@ class MobilityModel:
         self._init_points()
         self._sigmoid = None
         self._init_sigmoid()
-
+        landmark_selection = np.random.randint(len(self.map.landmarks), size=self.N)
+        self.lmc = self.map.landmarks[landmark_selection].T
         self.plotted = drawed
 
     def _init_sigmoid(self):
@@ -50,11 +51,10 @@ class MobilityModel:
         self._query_with_pykdtree(self.cur_pos.T, k=self.neighbor_limit)
 
     def _get_angle(self):
-        landmark_selection = np.random.randint(len(self.map.landmarks), size=self.N)
-        lmc = self.map.landmarks[landmark_selection].T
+
         goto_landmark = np.random.choice([0, 1], self.N, p=[1 - self.lm_possibility, self.lm_possibility])
-        angle = np.arctan2(lmc[1] - self.cur_pos[1],
-                           lmc[0] - self.cur_pos[0]) * goto_landmark  # landmark direction
+        angle = np.arctan2(self.lmc[1] - self.cur_pos[1],
+                           self.lmc[0] - self.cur_pos[0]) * goto_landmark  # landmark direction
         angle += (2 * np.pi * np.random.uniform(0.0, 1.0, self.N)) * (1 - goto_landmark)  # random direction
         return angle
 
@@ -66,6 +66,8 @@ class MobilityModel:
 
     def one_day(self):
         for i in xrange(self.period):
+            landmark_selection = np.random.randint(len(self.map.landmarks), size=self.N)
+            self.lmc = self.map.landmarks[landmark_selection].T
             angle = self._get_angle()
             self._calculate_cur_pos(angle)
 
