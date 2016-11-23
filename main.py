@@ -28,7 +28,7 @@ nb_limit = conf.getint("mobility", "neighbor_limit")
 distribution_map = conf.getboolean("plot","distribution_map")
 enhance_vs_r = conf.getboolean("plot","enhance_vs_r")
 
-iteration = 10
+iteration = 5000
 
 def drange(start, stop, step):
     r = start
@@ -42,6 +42,24 @@ def create_path_not_exists(path):
     except OSError as exception:
         if exception.errno != errno.EEXIST:
             raise
+
+def plot_in(data, step):
+    base_line = np.arange(step)
+    fig, ax = plt.subplots()
+
+    plt.plot(data)
+
+    ax.set_ylabel(u'Pc', color='k', style='italic')
+    ax.set_xlabel(u'Days', color='k', style='italic')
+    ax.set_title(u'Cooperation Rate under Different r (%i Node, %i Landmark)\n' % (N, lm_cur_no),
+                 fontproperties=MonoFont, fontsize=16)
+    fontP = FontProperties()
+    fontP.set_family('sans-serif')
+    fontP.set_size(11)
+    fig.savefig(u'output/Cooperation_Rate_%iNode_%iLmk_%iiter_enhance%.1f_%.1f_step_%s.png' % (
+    N, lm_cur_no, iteration, enhancement, enhancement_max, str(step)), dpi=300)
+    plt.clf()
+
 
 if __name__ == "__main__":
     create_path_not_exists("output/") # check if output directory exists
@@ -63,7 +81,10 @@ if __name__ == "__main__":
             result = [0.5]
             for i in xrange(iteration):
                 result.append(mobile_model.one_day())
-                #print i
+                print i
+                if i>0 and i %1000 == 0:
+                    plot_in(result, i)
+            plot_in(result, iteration)
             print time.time() - start_time
             print result
             print '\n'

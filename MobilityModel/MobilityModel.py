@@ -11,7 +11,7 @@ MonoFont = FontProperties('monospace')
 old_get_distutils_extension = pyximport.pyximport.get_distutils_extension
 def new_get_distutils_extension(modname, pyxfilename, language_level=None):
     extension_mod, setup_args = old_get_distutils_extension(modname, pyxfilename, language_level)
-    extension_mod.language='c++'
+    extension_mod.language='c'
     extension_mod.extra_compile_args=["-march=native","-O3","-ffast-math"]
     return extension_mod,setup_args
 pyximport.pyximport.get_distutils_extension = new_get_distutils_extension
@@ -34,8 +34,7 @@ class MobilityModel:
         self._init_points()
         self._sigmoid = None
         self._init_sigmoid()
-        landmark_selection = np.random.randint(len(self.map.landmarks), size=self.N)
-        self.lmc = self.map.landmarks[landmark_selection].T
+
         self.plotted = drawed
 
     def _init_sigmoid(self):
@@ -50,32 +49,35 @@ class MobilityModel:
         self.cur_pos = self.home_pos
         self._query_with_pykdtree(self.cur_pos.T, k=self.neighbor_limit)
 
+    def _get_angle(self):
+        landmark_selection = np.random.randint(len(self.map.landmarks), size=self.N)
+        lmc = self.map.landmarks[landmark_selection].T
+        goto_landmark = np.random.choice([0, 1], self.N, p=[1 - self.lm_possibility, self.lm_possibility])
+        angle = np.arctan2(lmc[1] - self.cur_pos[1],
+                           lmc[0] - self.cur_pos[0]) * goto_landmark  # landmark direction
+        angle += (2 * np.pi * np.random.uniform(0.0, 1.0, self.N)) * (1 - goto_landmark)  # random direction
+        return angle
+
+    def _calculate_cur_pos(self, angle):
+        v = self.velocity * self._sigmoid[np.array(self.neighbour_count)]
+        x = np.float32(self.cur_pos[0] + v * np.cos(angle))
+        y = np.float32(self.cur_pos[1] + v * np.sin(angle))
+        self.cur_pos = np.array((x, y))
+
     def one_day(self):
         for i in xrange(self.period):
-            goto_landmark = np.random.choice([0, 1], self.N, p=[1 - self.lm_possibility, self.lm_possibility])
-            # angle = np.zeros(self.N)
-            # print lmc[0]
-            angle = np.arctan2(self.lmc[1] - self.cur_pos[1], self.lmc[0] - self.cur_pos[0])*goto_landmark  # landmark direction
-            angle += (2 * np.pi * np.random.uniform(0.0, 1.0, self.N))*(1 - goto_landmark)    # random direction
-            v = self.velocity * self._sigmoid[np.array(self.neighbour_count)]
+            angle = self._get_angle()
+            self._calculate_cur_pos(angle)
 
-            # print id(self.cur_pos)
-            x = np.float32(self.cur_pos[0] + v * np.cos(angle))
-            y = np.float32(self.cur_pos[1] + v * np.sin(angle))
-            self.cur_pos = np.array((x,y))
-            # print id(self.cur_pos)
-            #
             # print id(self.cur_pos)
             # self.cur_pos[0] += v * np.cos(angle)
             # self.cur_pos[1] += v * np.sin(angle)
             # print id(self.cur_pos)
 
-            # x = np.take(self.cur_pos,0) + v * np.cos(angle)
-            # y = np.take(self.cur_pos,1) + v * np.sin(angle)
+
             nei = self._query_with_pykdtree(self.cur_pos.T, k=self.neighbor_limit)
             self.pgg.accumulate_neighbour(nei)
 
-            # print self.cur_pos
             if not self.plotted:
                  self._plot_map(i)
                  if i == self.period - 1:
@@ -90,9 +92,7 @@ class MobilityModel:
         tree = KDTree(points)
         results, self.neighbour_count = tree.query(points, k = k, distance_upper_bound = r)
         return results
-        # self.neighbours = np.logical_or(self.neighbours, results)
-        #return [r[:counts[idx]] for idx, r in enumerate(results.tolist())], counts
-        # return [r for r in results.tolist()], counts
+
 
     def _plot_map(self, idx):
         r = self.map.radius + 6
