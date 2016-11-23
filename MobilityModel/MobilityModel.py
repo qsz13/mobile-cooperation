@@ -12,7 +12,7 @@ old_get_distutils_extension = pyximport.pyximport.get_distutils_extension
 def new_get_distutils_extension(modname, pyxfilename, language_level=None):
     extension_mod, setup_args = old_get_distutils_extension(modname, pyxfilename, language_level)
     extension_mod.language='c++'
-    extension_mod.extra_compile_args=["-march=native","-O3"]
+    extension_mod.extra_compile_args=["-march=native","-O3","-ffast-math"]
     return extension_mod,setup_args
 pyximport.pyximport.get_distutils_extension = new_get_distutils_extension
 pyximport.install(setup_args={'include_dirs': np.get_include()})
