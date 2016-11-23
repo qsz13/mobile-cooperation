@@ -28,7 +28,7 @@ nb_limit = conf.getint("mobility", "neighbor_limit")
 distribution_map = conf.getboolean("plot","distribution_map")
 enhance_vs_r = conf.getboolean("plot","enhance_vs_r")
 
-iteration = 5000
+iteration = 10
 
 def drange(start, stop, step):
     r = start

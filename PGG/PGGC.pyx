@@ -7,6 +7,7 @@
 import cython
 import numpy as np
 cimport numpy as np
+from libc.stdint cimport uint32_t, uint16_t, uint8_t
 import itertools
 
 
@@ -28,15 +29,15 @@ cdef class PGGC:
     cdef void play_c(self, np.float32_t resource = 1., np.float32_t enhancement = 1.5):
         cdef np.ndarray[np.float64_t, ndim=1] pool
         cdef np.ndarray[np.float64_t, ndim=1] profit
-        cdef int idx, nei
+        cdef uint16_t idx, nei
         cdef np.ndarray[np.float64_t, ndim=1] contrib
         cdef np.ndarray[np.float64_t, ndim=1] share
-        cdef np.ndarray[np.uint64_t, ndim=1] neighbour_count
-        cdef np.float32_t probability
-        cdef np.float32_t max_diff
+        cdef np.ndarray[np.uint16_t, ndim=1] neighbour_count
+        cdef float probability
+        cdef float max_diff
         cdef np.ndarray[np.uint8_t, ndim=1] new_strategy
 
-        neighbour_count = self.player.sum(axis=1).astype(np.uint64)
+        neighbour_count = np.sum(self.player,axis=1).astype(np.uint16)
         contrib = self.strategy * resource
         contrib /= neighbour_count
         pool = np.dot(self.strategy*contrib, self.player)
