@@ -44,8 +44,8 @@ cdef class PGGC:
 
         share = enhancement * pool / neighbour_count
         profit = np.dot(share, self.player)
+        profit -= self.strategy*resource
         max_diff = self.minmax(profit)
-
         new_strategy = self.strategy
 
         for idx in xrange(self.N):
@@ -53,6 +53,7 @@ cdef class PGGC:
             if self.strategy[idx] == self.strategy[nei]:
                 continue
             probability = max(0, (profit[nei]-profit[idx])/max_diff)
+            # print probability
             if np.random.rand() < probability :
                 new_strategy[idx] = self.strategy[nei]
         self.strategy = new_strategy
