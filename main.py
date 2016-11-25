@@ -29,7 +29,7 @@ distribution_map = conf.getboolean("plot","distribution_map")
 enhance_vs_r = conf.getboolean("plot","enhance_vs_r")
 
 
-iteration = 100000
+iteration = 10000
 
 def drange(start, stop, step):
     r = start
@@ -83,7 +83,7 @@ if __name__ == "__main__":
             for i in xrange(iteration):
                 result.append(mobile_model.one_day())
                 print i
-                if i>0 and i %1000 == 0:
+                if i>0 and i %100 == 0:
                     plot_in(result, i)
             plot_in(result, iteration)
             print time.time() - start_time

@@ -25,7 +25,6 @@ cdef class PGGC:
         np.random.shuffle(self.strategy)
         self.player = np.zeros(shape=(self.N, self.N), dtype=np.uint8)
 
-
     cdef void play_c(self, np.float32_t resource = 1., np.float32_t enhancement = 1.5):
         cdef np.ndarray[np.float64_t, ndim=1] pool
         cdef np.ndarray[np.float64_t, ndim=1] profit
@@ -36,26 +35,41 @@ cdef class PGGC:
         cdef float probability
         cdef float max_diff
         cdef np.ndarray[np.uint8_t, ndim=1] new_strategy
-
         neighbour_count = np.sum(self.player,axis=1).astype(np.uint16)
+        # print "neighbour_count: "+str(neighbour_count.tolist())
+        # print "strategy: "+str(self.strategy.tolist())
         contrib = self.strategy * resource
         contrib /= neighbour_count
-        pool = np.dot(self.strategy*contrib, self.player)
-
+        # print "contrib: "+str(contrib.tolist())
+        pool = np.dot(contrib, self.player.T)
+        # print "pool: "+str(pool.tolist())
         share = enhancement * pool / neighbour_count
-        profit = np.dot(share, self.player)
+        # print "share: "+str(share.tolist())
+        profit = np.dot(share, self.player.T)
         profit -= self.strategy*resource
-        max_diff = self.minmax(profit)
+        # print "profit: "+str(profit.tolist())
+        # print profit
+        # max_diff = self.minmax(profit)
         new_strategy = self.strategy
-
+        # to_c = 0
+        # to_d = 0
         for idx in xrange(self.N):
             nei = np.random.choice(np.where(self.player[idx] == True)[0])
             if self.strategy[idx] == self.strategy[nei]:
                 continue
+            max_diff = self.minmax(profit)
+
             probability = max(0, (profit[nei]-profit[idx])/max_diff)
             # print probability
-            if np.random.rand() < probability :
+            if np.random.rand() < probability:
                 new_strategy[idx] = self.strategy[nei]
+                # if self.strategy[nei] == 1:
+                #     to_c+=1
+                # if self.strategy[nei] == 0:
+                #     to_d+=1
+        # print "to_c "+str(to_c)
+        # print "to_d"+str(to_d)
+
         self.strategy = new_strategy
 
 
