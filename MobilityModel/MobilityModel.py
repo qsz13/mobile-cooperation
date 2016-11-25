@@ -64,8 +64,12 @@ class MobilityModel:
         y = np.float32(self.cur_pos[1] + v * np.sin(angle))
         self.cur_pos = np.array((x, y))
 
-    def one_day(self):
+    def one_day(self, day):
+        if day % 1 == 0:
+            print "clear:" + str(day)
+            self.pgg.clear_player()
         for i in xrange(self.period):
+
             landmark_selection = np.random.randint(len(self.map.landmarks), size=self.N)
             self.lmc = self.map.landmarks[landmark_selection].T
             angle = self._get_angle()

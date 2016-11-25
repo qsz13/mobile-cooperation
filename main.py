@@ -81,7 +81,7 @@ if __name__ == "__main__":
                 mobile_model = MobilityModel(N, mobile_map, nb_limit, lm_possibility, period, enhancement_cur, drawed = True)  # no need to plot map
             result = [0.5]
             for i in xrange(iteration):
-                result.append(mobile_model.one_day())
+                result.append(mobile_model.one_day(i))
                 print i
                 if i>0 and i %100 == 0:
                     plot_in(result, i)
