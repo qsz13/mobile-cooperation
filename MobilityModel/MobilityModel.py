@@ -65,8 +65,8 @@ class MobilityModel:
         self.cur_pos = np.array((x, y))
 
     def one_day(self, day):
-        if day % 1 == 0:
-            print "clear:" + str(day)
+        if day % 2 == 0:
+            # print "clear:" + str(day)
             self.pgg.clear_player()
         for i in xrange(self.period):
 

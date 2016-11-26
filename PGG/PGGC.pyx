@@ -36,7 +36,7 @@ cdef class PGGC:
         cdef float max_diff
         cdef np.ndarray[np.uint8_t, ndim=1] new_strategy
         neighbour_count = np.sum(self.player,axis=1).astype(np.uint16)
-        print np.average(neighbour_count)
+        # print np.average(neighbour_count)
         contrib = self.strategy * resource
         contrib /= neighbour_count
         pool = np.dot(contrib, self.player.T)
