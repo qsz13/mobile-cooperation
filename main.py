@@ -78,9 +78,9 @@ if __name__ == "__main__":
             print "enhancement: %.1f "%enhancement_cur
             start_time = time.time()
             if enhancement_cur == enhancement:
-                mobile_model = MobilityModel(N, mobile_map, nb_limit, lm_possibility, period, enhancement_cur, drawed = not distribution_map) #need to plot map the first time
+                mobile_model = MobilityModel(N, mobile_map, nb_limit, lm_possibility, period, enhancement_cur, drawed = not distribution_map, clr_period=clr_period) #need to plot map the first time
             else:
-                mobile_model = MobilityModel(N, mobile_map, nb_limit, lm_possibility, period, enhancement_cur, drawed = True)  # no need to plot map
+                mobile_model = MobilityModel(N, mobile_map, nb_limit, lm_possibility, period, enhancement_cur, drawed = True, clr_period=clr_period)  # no need to plot map
             result = [0.5]
             for i in xrange(iteration):
                 result.append(mobile_model.one_day(i))
