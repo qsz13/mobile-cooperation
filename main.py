@@ -1,5 +1,3 @@
-import matplotlib as mpl
-mpl.use('Agg')
 import time, os, errno
 from MobilityModel.MobilityModel import MobilityModel
 from PGG.Map import Map
