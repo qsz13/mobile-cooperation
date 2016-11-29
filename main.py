@@ -68,12 +68,13 @@ if __name__ == "__main__":
     create_path_not_exists("output/") # check if output directory exists
     print "landmark configuration: %i, %i, %i"%(lm_no, lm_max, lm_step)
     print "enhancement configuration: %.1f, %.1f, %.1f\n"%(enhancement, enhancement_max, enhancement_step)
-
+    node_num_around_landmark = []
     for lm_cur_no in xrange(lm_no, lm_max+lm_step, lm_step):
         enhancement_result = []
         print "current landmark no: %i"%lm_cur_no
         #if lm_cur_no == 1:
         mobile_map = Map(N, lm_min_dist, lm_cur_no)
+        append_to_node_around_lm = True
         for enhancement_cur in drange(enhancement,enhancement_max+enhancement_step,enhancement_step):
             print "enhancement: %.1f "%enhancement_cur
             start_time = time.time()
@@ -95,8 +96,10 @@ if __name__ == "__main__":
             for item in result:
                 outfile.write("%s\n" % item)
             outfile.close()
-
             enhancement_result.append(result)
+            if append_to_node_around_lm:
+                node_num_around_landmark.append(mobile_model.node_num_around_landmark)
+                append_to_node_around_lm = False
         '''
         else:
             start_time = time.time()
@@ -108,7 +111,6 @@ if __name__ == "__main__":
             print time.time() - start_time
             print result
         '''
-
         #plot enhancement vs cooperation ratio
         if enhance_vs_r:
             i = 0
@@ -133,4 +135,23 @@ if __name__ == "__main__":
             fig.savefig(u'output/Cooperation_Rate_%iNode_%iLmk_%iiter_enhance%.1f_%.1f.png' % (N,lm_cur_no,iteration,enhancement,enhancement_max), dpi=300)
             plt.clf()
 
+    if distribution_map:
+        fig, ax = plt.subplots()
+        legend_list = []
+        landmark_num = range(lm_no, lm_max+lm_step, lm_step)
+        base_line = np.arange(0,5.5,0.5)
+        print landmark_num
+        for idx, data in enumerate(node_num_around_landmark):
+            plt.plot(base_line, data)
+            legend_list.append('landmark = %.1f' % landmark_num[idx])
+        ax.set_ylabel(u'Nodes', color='k', style='italic')
+        ax.set_xlabel(u'Distance', color='k', style='italic')
+        ax.set_title(u'Node number around landmarks with node size: %i\n' % N,
+                     fontproperties=MonoFont, fontsize=16)
 
+        fontP = FontProperties()
+        fontP.set_family('sans-serif')
+        fontP.set_size(11)
+        plt.legend(legend_list, loc='best', prop=fontP)
+        fig.savefig(u'output/Landmark_Node_%iNode.png' % N, dpi=300)
+        plt.clf()

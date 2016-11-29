@@ -38,6 +38,7 @@ class MobilityModel:
         self.lmc = self.map.landmarks[landmark_selection].T
         self.plotted = drawed
         self.clr_period = clr_period
+        self.node_num_around_landmark = []
 
     def _init_sigmoid(self):
         self._sigmoid = np.array([1 / (1 + math.exp(i - 15)) for i in xrange(self.neighbor_limit+1)])
@@ -87,13 +88,25 @@ class MobilityModel:
 
             if not self.plotted:
                  self._plot_map(i)
+
                  if i == self.period - 1:
+                     self._record_node_number_around_landmark()
                      self.plotted = True
                      plt.close()
 
         self.pgg.play(resource = 1.0, enhancement = self.enhancement)
         self.cur_pos = self.home_pos
         return self.pgg.get_coper_num()/float(self.N)
+
+    def _record_node_number_around_landmark(self):
+        landmark = np.float32(self.map.landmarks)
+        points = self.cur_pos.T
+        all_points = np.concatenate((landmark,points))
+        tree = KDTree(all_points)
+        for i in np.arange(0,5.5,0.5):
+            results , count = tree.query(all_points, k = 3000, distance_upper_bound = np.float32(i))
+            print i
+            self.node_num_around_landmark.append(np.average(count[0:len(landmark)]))
 
     def _query_with_pykdtree(self, points, k = 20, r = np.float32(1.)):
         tree = KDTree(points)
