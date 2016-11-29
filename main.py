@@ -25,12 +25,13 @@ lm_possibility = conf.getfloat("map", "landmark_possibility")
 period = conf.getint("mobility", "period")
 (enhancement, enhancement_max, enhancement_step) = map(float, conf.get("mobility","enhancement").split(","))
 nb_limit = conf.getint("mobility", "neighbor_limit")
+clr_period = conf.getint("mobility","clr_period")
 
 distribution_map = conf.getboolean("plot","distribution_map")
 enhance_vs_r = conf.getboolean("plot","enhance_vs_r")
 
-
-iteration = 3000
+iteration = conf.getint("iteration","iteration")
+repeat = conf.getint("iteration","repeat")
 
 def drange(start, stop, step):
     r = start

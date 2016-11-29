@@ -22,7 +22,7 @@ from PGG.PGGC import PGGC
 PI = np.pi
 
 class MobilityModel:
-    def __init__(self, N, mobile_map, nb_limit, lm_possibility, period, enhance, drawed):
+    def __init__(self, N, mobile_map, nb_limit, lm_possibility, period, enhance, drawed, clr_period):
         self.N = N
         self.map = mobile_map
         self.neighbor_limit = nb_limit
@@ -37,6 +37,7 @@ class MobilityModel:
         landmark_selection = np.random.randint(len(self.map.landmarks), size=self.N)
         self.lmc = self.map.landmarks[landmark_selection].T
         self.plotted = drawed
+        self.clr_period = clr_period
 
     def _init_sigmoid(self):
         self._sigmoid = np.array([1 / (1 + math.exp(i - 15)) for i in xrange(self.neighbor_limit+1)])
@@ -65,7 +66,7 @@ class MobilityModel:
         self.cur_pos = np.array((x, y))
 
     def one_day(self, day):
-        if day % 2 == 0:
+        if day % self.clr_period == 0:
             # print "clear:" + str(day)
             self.pgg.clear_player()
         for i in xrange(self.period):
