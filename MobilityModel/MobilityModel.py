@@ -71,8 +71,8 @@ class MobilityModel:
             self.pgg.clear_player()
         for i in xrange(self.period):
 
-            landmark_selection = np.random.randint(len(self.map.landmarks), size=self.N)
-            self.lmc = self.map.landmarks[landmark_selection].T
+            # landmark_selection = np.random.randint(len(self.map.landmarks), size=self.N)
+            # self.lmc = self.map.landmarks[landmark_selection].T
             angle = self._get_angle()
             self._calculate_cur_pos(angle)
 
@@ -114,7 +114,7 @@ class MobilityModel:
         c = plt.Circle((0, 0), radius = self.map.radius, color = 'r', linewidth = 0.5, fill = False)
         ax.add_artist(c)
         # plt.plot(x, y, 'bo')
-        node = plt.scatter(*zip(*self.cur_pos), s = 0.2, color = 'b')
+        node = plt.scatter(*zip(*self.cur_pos.T), s = 0.2, color = 'b')
         landmark = plt.scatter(*zip(*self.map.landmarks), color = 'r')
         ax.set_title(u'Distribution Map of %i Nodes in Daily Step %i\n' % (self.N, idx), fontproperties = MonoFont, fontsize = 18)
         fontP = FontProperties()
