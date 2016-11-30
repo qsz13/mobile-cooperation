@@ -22,7 +22,7 @@ from PGG.PGGC import PGGC
 PI = np.pi
 
 class MobilityModel:
-    def __init__(self, N, mobile_map, nb_limit, lm_possibility, period, enhance, drawed, clr_period):
+    def __init__(self, N, mobile_map, nb_limit, lm_possibility, period, enhance, drawed, clr_period, lm_random):
         self.N = N
         self.map = mobile_map
         self.neighbor_limit = nb_limit
@@ -35,10 +35,11 @@ class MobilityModel:
         self._sigmoid = None
         self._init_sigmoid()
         landmark_selection = np.random.randint(len(self.map.landmarks), size=self.N)
-        self.lmc = self.map.landmarks[landmark_selection].T
+        self.lm_coord = self.map.landmarks[landmark_selection].T
         self.plotted = drawed
         self.clr_period = clr_period
         self.node_num_around_landmark = []
+        self.lm_random = lm_random
 
     def _init_sigmoid(self):
         self._sigmoid = np.array([1 / (1 + math.exp(i - 15)) for i in xrange(self.neighbor_limit+1)])
@@ -53,10 +54,13 @@ class MobilityModel:
         self._query_with_pykdtree(self.cur_pos.T, k=self.neighbor_limit)
 
     def _get_angle(self):
-
+        if self.lm_random == "every_step":
+            # print "every_step"
+            landmark_selection = np.random.randint(len(self.map.landmarks), size=self.N)
+            self.lm_coord = self.map.landmarks[landmark_selection].T
         goto_landmark = np.random.choice([0, 1], self.N, p=[1 - self.lm_possibility, self.lm_possibility])
-        angle = np.arctan2(self.lmc[1] - self.cur_pos[1],
-                           self.lmc[0] - self.cur_pos[0]) * goto_landmark  # landmark direction
+        angle = np.arctan2(self.lm_coord[1] - self.cur_pos[1],
+                           self.lm_coord[0] - self.cur_pos[0]) * goto_landmark  # landmark direction
         angle += (2 * np.pi * np.random.uniform(0.0, 1.0, self.N)) * (1 - goto_landmark)  # random direction
         return angle
 
@@ -67,22 +71,17 @@ class MobilityModel:
         self.cur_pos = np.array((x, y))
 
     def one_day(self, day):
+        print day
         if day % self.clr_period == 0:
             # print "clear:" + str(day)
             self.pgg.clear_player()
+        if self.lm_random == "every_day":
+            # print "every_day"
+            landmark_selection = np.random.randint(len(self.map.landmarks), size=self.N)
+            self.lm_coord = self.map.landmarks[landmark_selection].T
         for i in xrange(self.period):
-
-            # landmark_selection = np.random.randint(len(self.map.landmarks), size=self.N)
-            # self.lmc = self.map.landmarks[landmark_selection].T
             angle = self._get_angle()
             self._calculate_cur_pos(angle)
-
-            # print id(self.cur_pos)
-            # self.cur_pos[0] += v * np.cos(angle)
-            # self.cur_pos[1] += v * np.sin(angle)
-            # print id(self.cur_pos)
-
-
             nei = self._query_with_pykdtree(self.cur_pos.T, k=self.neighbor_limit)
             self.pgg.accumulate_neighbour(nei)
 

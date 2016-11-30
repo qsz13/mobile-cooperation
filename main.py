@@ -9,7 +9,7 @@ import ConfigParser
 import csv
 
 current_repeat = 0
-if len(sys.argv):
+if len(sys.argv) > 1:
     current_repeat = int(sys.argv[1])
 
 MonoFont = FontProperties('monospace')
@@ -40,6 +40,7 @@ if current_repeat > 1:
 iteration = conf.getint("iteration","iteration")
 repeat = conf.getint("iteration","repeat")
 
+landmark_random = conf.get("landmark","randomness")
 
 def drange(start, stop, step):
     r = start
@@ -87,9 +88,9 @@ if __name__ == "__main__":
             print "enhancement: %.1f "%enhancement_cur
             start_time = time.time()
             if enhancement_cur == enhancement:
-                mobile_model = MobilityModel(N, mobile_map, nb_limit, lm_possibility, period, enhancement_cur, drawed = not distribution_map, clr_period=clr_period) #need to plot map the first time
+                mobile_model = MobilityModel(N, mobile_map, nb_limit, lm_possibility, period, enhancement_cur, drawed = not distribution_map, clr_period=clr_period, lm_random = landmark_random) #need to plot map the first time
             else:
-                mobile_model = MobilityModel(N, mobile_map, nb_limit, lm_possibility, period, enhancement_cur, drawed = True, clr_period=clr_period)  # no need to plot map
+                mobile_model = MobilityModel(N, mobile_map, nb_limit, lm_possibility, period, enhancement_cur, drawed = True, clr_period=clr_period, lm_random = landmark_random)  # no need to plot map
             result = [0.5]
             for i in xrange(iteration):
                 result.append(mobile_model.one_day(i))
@@ -148,7 +149,7 @@ if __name__ == "__main__":
         legend_list = []
         landmark_num = range(lm_no, lm_max+lm_step, lm_step)
         base_line = np.arange(0,5.5,0.5)
-        print landmark_num
+        # print landmark_num
         for idx, data in enumerate(node_num_around_landmark):
             plt.plot(base_line, data)
             legend_list.append('landmark = %.1f' % landmark_num[idx])
