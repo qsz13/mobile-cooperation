@@ -71,7 +71,6 @@ class MobilityModel:
         self.cur_pos = np.array((x, y))
 
     def one_day(self, day):
-        print day
         if day % self.clr_period == 0:
             # print "clear:" + str(day)
             self.pgg.clear_player()
@@ -104,7 +103,7 @@ class MobilityModel:
         tree = KDTree(all_points)
         for i in np.arange(0,5.5,0.5):
             results , count = tree.query(all_points, k = 3000, distance_upper_bound = np.float32(i))
-            print i
+            # print i
             self.node_num_around_landmark.append(np.average(count[0:len(landmark)]))
 
     def _query_with_pykdtree(self, points, k = 20, r = np.float32(1.)):
