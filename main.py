@@ -1,4 +1,5 @@
-import time, os, errno
+#!/usr/bin/python
+import time, os, errno, sys
 from MobilityModel.MobilityModel import MobilityModel
 from PGG.Map import Map
 import matplotlib.pyplot as plt
@@ -6,6 +7,10 @@ from matplotlib.font_manager import FontProperties
 import numpy as np
 import ConfigParser
 import csv
+
+current_repeat = 0
+if len(sys.argv):
+    current_repeat = int(sys.argv[1])
 
 MonoFont = FontProperties('monospace')
 
@@ -29,9 +34,12 @@ clr_period = conf.getint("mobility","clr_period")
 
 distribution_map = conf.getboolean("plot","distribution_map")
 enhance_vs_r = conf.getboolean("plot","enhance_vs_r")
+if current_repeat > 1:
+    distribution_map = False
 
 iteration = conf.getint("iteration","iteration")
 repeat = conf.getint("iteration","repeat")
+
 
 def drange(start, stop, step):
     r = start
@@ -85,14 +93,14 @@ if __name__ == "__main__":
             result = [0.5]
             for i in xrange(iteration):
                 result.append(mobile_model.one_day(i))
-                print i
+                #print i
                 # if i>0 and i %1000 == 0:
                 #     plot_in(result, i)
             # plot_in(result, iteration)
             print time.time() - start_time
             print result
             print '\n'
-            outfile = open(u'output/Cooperation_Rate_%iNode_%iLmk_%iiter_enhance%.1f.txt' % (N,lm_cur_no,iteration,enhancement_cur), 'w')
+            outfile = open(u'output/Cooperation_Rate_%iNode_%iLmk_%iiter_enhance%.1f_repeat_%i.txt' % (N,lm_cur_no,iteration,enhancement_cur,current_repeat), 'w')
             for item in result:
                 outfile.write("%s\n" % item)
             outfile.close()
@@ -132,7 +140,7 @@ if __name__ == "__main__":
             fontP.set_family('sans-serif')
             fontP.set_size(11)
             plt.legend(legend_list, loc = 'best', prop = fontP)
-            fig.savefig(u'output/Cooperation_Rate_%iNode_%iLmk_%iiter_enhance%.1f_%.1f.png' % (N,lm_cur_no,iteration,enhancement,enhancement_max), dpi=300)
+            fig.savefig(u'output/Cooperation_Rate_%iNode_%iLmk_%iiter_enhance%.1f_%.1f_repeat_%1.png' % (N,lm_cur_no,iteration,enhancement,enhancement_max,current_repeat), dpi=300)
             plt.clf()
 
     if distribution_map:
