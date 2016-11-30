@@ -140,7 +140,7 @@ if __name__ == "__main__":
             fontP.set_family('sans-serif')
             fontP.set_size(11)
             plt.legend(legend_list, loc = 'best', prop = fontP)
-            fig.savefig(u'output/Cooperation_Rate_%iNode_%iLmk_%iiter_enhance%.1f_%.1f_repeat_%1.png' % (N,lm_cur_no,iteration,enhancement,enhancement_max,current_repeat), dpi=300)
+            fig.savefig(u'output/Cooperation_Rate_%iNode_%iLmk_%iiter_enhance%.1f_%.1f_repeat_%i.png' % (N,lm_cur_no,iteration,enhancement,enhancement_max,current_repeat), dpi=300)
             plt.clf()
 
     if distribution_map:

@@ -1,5 +1,15 @@
 import sys, os, time
 from subprocess import Popen, list2cmdline
+import ConfigParser
+scriptDirectory = os.path.dirname(os.path.realpath(__file__))
+_confile = "mobi-coop.conf"
+
+# initialize the config parser
+conf = ConfigParser.ConfigParser()
+confFile = os.path.join(scriptDirectory,_confile)
+conf.read(confFile)
+
+repeat = conf.getint("iteration","repeat")
 
 def exec_commands(cmds):
     ''' Exec commands in parallel in multiple process '''
@@ -32,12 +42,9 @@ def exec_commands(cmds):
         else:
             time.sleep(0.5)
 
-commands = [
-    ['python', 'main.py', '1'],
-    ['python', 'main.py', '2'],
-    ['python', 'main.py', '3'],
-    ['python', 'main.py', '4'],
-    ['python', 'main.py', '5'],
-]
+if __name__ == "__main__":
+    commands = []
+    for i in xrange(repeat):
+        commands.append(['python','main.py',str(i)])
 
-exec_commands(commands)
+    exec_commands(commands)
