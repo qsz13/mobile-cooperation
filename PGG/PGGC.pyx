@@ -44,7 +44,7 @@ cdef class PGGC:
         profit = np.dot(share, self.player.T)
         profit -= self.strategy*resource
         max_diff = self.minmax(profit)
-        new_strategy = self.strategy
+        new_strategy = self.strategy.copy()
 
         for idx in xrange(self.N):
             nei = np.random.choice(np.where(self.player[idx] == True)[0])
