@@ -17,6 +17,8 @@ cdef class PGGC:
     cdef int N
     cdef np.ndarray strategy
     cdef np.ndarray player
+    # cdef np.ndarray profit
+    # cdef np.ndarray switch
 
     def __init__(self, N):
         self.N = N
@@ -24,6 +26,8 @@ cdef class PGGC:
         self.strategy[::2] = True
         np.random.shuffle(self.strategy)
         self.player = np.zeros(shape=(self.N, self.N), dtype=np.uint8)
+        # self.profit = np.zeros(self.N, dtype=np.float64)
+        # self.switch = np.zeros(self.N, dtype=np.int8)
 
     cdef void play_c(self, np.float32_t resource = 1., np.float32_t enhancement = 1.5):
         cdef np.ndarray[np.float64_t, ndim=1] pool
@@ -55,8 +59,9 @@ cdef class PGGC:
             if np.random.rand() < probability:
                 new_strategy[idx] = self.strategy[nei]
 
+        # self.switch = new_strategy.astype(np.int8)-self.strategy.astype(np.int8)
         self.strategy = new_strategy
-
+        # self.profit = profit
 
 
     def play(self, resource = 1., enhancement = 1.5):
@@ -66,9 +71,18 @@ cdef class PGGC:
     def accumulate_neighbour(self,  neighbour):
         self.player = np.logical_or(self.player, neighbour)
 
-
+    # def get_strategy(self):
+    #     return self.strategy
     def get_coper_num(self):
         return np.count_nonzero(self.strategy)
+
+    # def get_strategy_switch(self):
+    #     return self.switch
+    # def get_coper_rate(self):
+    #     return float(np.count_nonzero(self.strategy))/self.N
+    #
+    # def get_profit(self):
+    #     return self.profit
 
 
     cdef float minmax(self, np.ndarray[np.float64_t, ndim=1] data) :

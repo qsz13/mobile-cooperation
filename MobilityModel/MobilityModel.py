@@ -88,11 +88,15 @@ class MobilityModel:
                  self._plot_map(i)
 
                  if i == self.period - 1:
-                     self._record_node_number_around_landmark()
+                     # self._record_node_number_around_landmark()
                      self.plotted = True
                      plt.close()
 
         self.pgg.play(resource = 1.0, enhancement = self.enhancement)
+        # if day % 10 == 0:
+        #     self.plot_payoff(day)
+        #     self.plot_strategy(day)
+        #     self.plot_switch_strategy(day)
         self.cur_pos = self.home_pos
         return self.pgg.get_coper_num()/float(self.N)
 
@@ -111,10 +115,101 @@ class MobilityModel:
         results, self.neighbour_count = tree.query(points, k = k, distance_upper_bound = r)
         return results
 
+    def plot_switch_strategy(self,day):
+        switch = self.pgg.get_strategy_switch()
+        r = self.map.radius + 6
+        coprate = self.pgg.get_coper_rate()
+        # fig, ax = plt.subplots()
+        fig = plt.gcf()
+        ax = fig.gca()
+
+        fig.set_size_inches(7.5, 7.5)
+
+        plt.xlim(-r, r)
+        plt.ylim(-r, r)
+        c = plt.Circle((0, 0), radius=self.map.radius, color='r', linewidth=0.5, fill=False)
+        ax.add_artist(c)
+        # plt.plot(x, y, 'bo')
+        node = plt.scatter(*zip(*self.cur_pos.T), s=3, c=["r" if x == 1 else "b" if x == -1 else "yellow" for x in switch], cmap='bwr',
+                           linewidth='0')
+        # print switch
+        # print ["r" if x == 1 else "b" if x == -1 else "black" for x in switch]
+        # ['yes' if v == 1 else 'no' if v == 2 else 'idle' for v in l]
+        plt.gca().set_aspect('equal', adjustable='box')
+
+        landmark = plt.scatter(*zip(*self.map.landmarks), color="black")
+        ax.set_title(u'Strategy Switch in day %i\nCoop rate %f' % (day, coprate), fontproperties=MonoFont,
+                     fontsize=18)
+        fontP = FontProperties()
+        fontP.set_family('sans-serif')
+        fontP.set_size(12)
+        ax.legend((node, landmark), (u'Node', u'Landmark'), prop=fontP)
+        # plt.axes().set_aspect('equal', 'datalim')
+        fig.savefig(u'output/Switch_%iehn_%iLmk_%i.png' % (self.enhancement, len(self.map.landmarks), day), dpi=300)
+        plt.clf()
+
+    def plot_strategy(self, day):
+        strategy = self.pgg.get_strategy()
+        coprate = self.pgg.get_coper_rate()
+        r = self.map.radius + 6
+        # fig, ax = plt.subplots()
+        fig = plt.gcf()
+        ax = fig.gca()
+
+        fig.set_size_inches(7.5, 7.5)
+
+        plt.xlim(-r, r)
+        plt.ylim(-r, r)
+        c = plt.Circle((0, 0), radius=self.map.radius, color='r', linewidth=0.5, fill=False)
+        ax.add_artist(c)
+        # plt.plot(x, y, 'bo')
+        node = plt.scatter(*zip(*self.cur_pos.T), s=1, c=["b" if x==0 else "r" for x in strategy], cmap='bwr', linewidth='0')
+        plt.gca().set_aspect('equal', adjustable='box')
+
+        landmark = plt.scatter(*zip(*self.map.landmarks), color="black")
+        ax.set_title(u'Strategy in day %i\nCoop rate %f' % (day,coprate), fontproperties=MonoFont,
+                     fontsize=18)
+        fontP = FontProperties()
+        fontP.set_family('sans-serif')
+        fontP.set_size(12)
+        ax.legend((node, landmark), (u'Node', u'Landmark'), prop=fontP)
+        # plt.axes().set_aspect('equal', 'datalim')
+        fig.savefig(u'output/Strategy_%iehn_%iLmk_%i.png' % (self.enhancement, len(self.map.landmarks), day), dpi=300)
+        plt.clf()
+
+    def plot_payoff(self, day):
+        profit = self.pgg.get_profit()
+        profit *= 1/profit.max()
+        r = self.map.radius + 6
+        # fig, ax = plt.subplots()
+        fig = plt.gcf()
+        ax = fig.gca()
+
+        fig.set_size_inches(7.5, 7.5)
+
+        plt.xlim(-r, r)
+        plt.ylim(-r, r)
+        c = plt.Circle((0, 0), radius=self.map.radius, color='r', linewidth=0.5, fill=False)
+        ax.add_artist(c)
+        # plt.plot(x, y, 'bo')
+        node = plt.scatter(*zip(*self.cur_pos.T), s=1, c=profit, cmap='jet', linewidth='0')
+        plt.gca().set_aspect('equal', adjustable='box')
+        plt.colorbar()
+
+        landmark = plt.scatter(*zip(*self.map.landmarks), color="black")
+        ax.set_title(u'Profit in day %i\n' % day, fontproperties=MonoFont,
+                     fontsize=18)
+        fontP = FontProperties()
+        fontP.set_family('sans-serif')
+        fontP.set_size(12)
+        ax.legend((node, landmark), (u'Node', u'Landmark'), prop=fontP)
+        # plt.axes().set_aspect('equal', 'datalim')
+        fig.savefig(u'output/Profit_%iNode_%ienh_%iLmk_%i.png' % (self.N,self.enhancement, len(self.map.landmarks), day), dpi=300)
+        plt.clf()
 
     def _plot_map(self, idx):
         r = self.map.radius + 6
-        #fig, ax = plt.subplots()
+        # fig, ax = plt.subplots()
         fig = plt.gcf()
         ax = fig.gca()
 
